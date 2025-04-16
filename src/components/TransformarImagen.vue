@@ -11,7 +11,7 @@
                     @click="seleccionarEstilo(estilo.id)"
                 >
                     <img :src="estilo.imagen" alt="Estilo" class="style-image" />
-                    <p>{{ estilo.nombre }}</p>
+                    <p >{{ estilo.nombre }}</p>
                 </li>
             </ul>
         </aside>
@@ -140,6 +140,7 @@ const convertirImagen = async () => {
     font-size: 1.5rem;
     text-align: center;
 }
+
 
 .sidebar ul {
     display: grid;

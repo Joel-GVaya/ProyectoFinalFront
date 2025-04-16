@@ -6,7 +6,7 @@
                 <label for="nombre">Nombre:</label>
                 <input type="text" id="nombre" v-model="nombre" />
             </div>
-                <div class="form-group">
+            <div class="form-group">
                 <label for="apellidos">Apellidos:</label>
                 <input type="text" id="apellidos" v-model="apellidos" />
             </div>
@@ -30,6 +30,15 @@
                     v-model="nuevaPassword"
                     :disabled="!credencialesEditables"
                     placeholder="Introduce tu nueva contraseña"
+                />
+            </div>
+            <div class="form-group" v-if="credencialesEditables">
+                <label for="confirmar-password">Confirmar nueva contraseña:</label>
+                <input
+                    type="password"
+                    id="confirmar-password"
+                    v-model="confirmarPassword"
+                    placeholder="Confirma tu nueva contraseña"
                 />
             </div>
             <div class="form-group imagen-group">
@@ -64,6 +73,21 @@
                 </button>
             </div>
         </form>
+
+        <!-- Verificación sin modal -->
+        <div v-if="mostrarVerificacion" class="verificacion">
+            <h2>Verificación</h2>
+            <p>Introduce tu contraseña actual para habilitar la edición:</p>
+            <input
+                type="password"
+                v-model="password"
+                placeholder="Contraseña actual"
+            />
+            <div class="verificacion-actions">
+                <button @click="verificarCredenciales">Confirmar</button>
+                <button @click="cerrarVerificacion">Cancelar</button>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -74,11 +98,12 @@ import { useUserStore } from '@/store/store.js'
 const store = useUserStore()
 
 const nombre = ref(store.usuarioAutenticado.nombre)
-const apellidos = ref(store.usuarioAutenticado.apellidos || '') // Nuevo campo
+const apellidos = ref(store.usuarioAutenticado.apellidos || '')
 const edad = ref(store.usuarioAutenticado.edad)
 const telefono = ref(store.usuarioAutenticado.telefono)
 const correo = ref(store.usuarioAutenticado.correo)
 const nuevaPassword = ref('')
+const confirmarPassword = ref('') // Nueva variable para confirmar la contraseña
 const imagen = ref(store.usuarioAutenticado.imagen || '')
 const password = ref('')
 const error = ref('')
@@ -101,11 +126,16 @@ const eliminarImagen = () => {
 }
 
 const guardarCambios = async () => {
+    if (nuevaPassword.value !== confirmarPassword.value) {
+        alert('Las contraseñas no coinciden. Por favor, verifica e inténtalo de nuevo.')
+        return
+    }
+
     try {
         const datosActualizados = {
             id: store.usuarioAutenticado.id,
             nombre: nombre.value,
-            apellidos: apellidos.value, // Guardar apellidos
+            apellidos: apellidos.value,
             correo: correo.value,
             edad: edad.value,
             telefono: telefono.value,
@@ -116,10 +146,26 @@ const guardarCambios = async () => {
         Object.assign(store.usuarioAutenticado, datosActualizados)
         credencialesEditables.value = false
         nuevaPassword.value = ''
+        confirmarPassword.value = '' // Limpia el campo de confirmación
         alert('Cambios guardados exitosamente.')
     } catch (e) {
         alert('Error al guardar los cambios.')
     }
+}
+
+const verificarCredenciales = () => {
+    if (password.value === store.usuarioAutenticado.password) {
+        credencialesEditables.value = true
+        mostrarVerificacion.value = false
+        password.value = ''
+    } else {
+        alert('Contraseña incorrecta.')
+    }
+}
+
+const cerrarVerificacion = () => {
+    mostrarVerificacion.value = false
+    password.value = ''
 }
 </script>
 
@@ -165,6 +211,8 @@ input {
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 1rem;
+    width: 100%;
+    margin-bottom: 1rem;
 }
 
 /* Imagen de perfil */
@@ -228,5 +276,59 @@ button {
 .delete-image-button:hover {
     background-color: #c0392b;
     transform: scale(1.05);
+}
+
+.verificacion {
+    margin-top: 2rem;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    text-align: center;
+}
+
+.verificacion h2 {
+    margin-bottom: 1rem;
+    color: #2c3e50;
+}
+
+.verificacion p {
+    margin-bottom: 1rem;
+    color: #34495e;
+}
+
+.verificacion input {
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.verificacion-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.verificacion-actions button {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.verificacion-actions button:first-child {
+    background-color: #4caf50;
+    color: white;
+}
+
+.verificacion-actions button:last-child {
+    background-color: #e74c3c;
+    color: white;
 }
 </style>

@@ -8,13 +8,13 @@
                 <div class="dropdown-menu" v-if="menuAbierto">
                     <ul>
                         <li class="opcion-usuario">
-                            <router-link to="/perfil" @click.native="closeMenu">
+                            <router-link to="/perfil" @click="closeMenu">
                                 <span class="material-icons" style="vertical-align: middle; margin-right: 6px;">account_circle</span>
                                 Perfil
                             </router-link>
                         </li>
                         <li class="opcion-usuario">
-                            <router-link to="/planes" @click.native="closeMenu">
+                            <router-link to="/planes" @click="closeMenu">
                                 <span class="material-icons" style="vertical-align: middle; margin-right: 6px;">bolt</span>
                                 Planes
                             </router-link>
@@ -177,7 +177,7 @@ html, body {
 
 /* Opcional: Estilo al pasar el ratón por encima */
 .dropdown-menu a:hover {
-    color: #4caf50; /* Cambia el color al pasar el ratón */
+    color: #68af4c; /* Cambia el color al pasar el ratón */
     text-decoration: none; /* Asegúrate de que no aparezca subrayado */
 }
 
@@ -222,5 +222,9 @@ html, body {
 .opcion-usuario {
     cursor: pointer;
     border-radius: 15px;
+}
+
+.cerrar-sesion:hover {
+    color: #e74c3c;
 }
 </style>
