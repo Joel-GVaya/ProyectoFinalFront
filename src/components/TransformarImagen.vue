@@ -34,84 +34,71 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useUserStore } from '@/store/store.js'
+import { ref } from 'vue';
+import { useUserStore } from '@/store/store.js'; // Importa el store
 
-const store = useUserStore()
+// Obtén la instancia del store
+const store = useUserStore();
 
 // Importar las imágenes directamente
-import lineArtImage from '@/assets/Estilos/LineArt.jpg'
+import lineArtImage from '@/assets/Estilos/LineArt.jpg';
 
 const estilos = ref([
     { id: 1, nombre: 'LineArt', imagen: lineArtImage },
     { id: 2, nombre: 'Pixar', imagen: lineArtImage },
-    { id: 3, nombre: 'Anime', imagen: lineArtImage },
-    { id: 4, nombre: 'FunkoPop', imagen: lineArtImage },
-    { id: 5, nombre: 'Alienigena', imagen: lineArtImage },
-    { id: 6, nombre: 'LineArt', imagen: lineArtImage },
-    { id: 7, nombre: 'LineArt', imagen: lineArtImage },
-    { id: 8, nombre: 'LineArt', imagen: lineArtImage },
-    { id: 9, nombre: 'LineArt', imagen: lineArtImage },
-    { id: 10, nombre: 'LineArt', imagen: lineArtImage },
-    { id: 11, nombre: 'LineArt', imagen: lineArtImage },
-    { id: 12, nombre: 'LineArt', imagen: lineArtImage },
-    { id: 13, nombre: 'LineArt', imagen: lineArtImage },
-    { id: 14, nombre: 'LineArt', imagen: lineArtImage },
-    { id: 15, nombre: 'LineArt', imagen: lineArtImage },
-    { id: 16, nombre: 'LineArt', imagen: lineArtImage },
-    { id: 17, nombre: 'LineArt', imagen: lineArtImage },
-    { id: 18, nombre: 'LineArt', imagen: lineArtImage },
-    { id: 19, nombre: 'LineArt', imagen: lineArtImage },
-    { id: 20, nombre: 'LineArt', imagen: lineArtImage }
-])
+    { id: 3, nombre: 'Anime', imagen: lineArtImage }
+]);
 
-const estiloSeleccionado = ref(null)
-const imagen = ref(null)
-const fileInput = ref(null)
+const estiloSeleccionado = ref(null);
+const imagen = ref(null);
+const fileInput = ref(null); // Referencia al elemento DOM <input>
+const archivoSeleccionado = ref(null); // Almacena el archivo seleccionado
 
 const seleccionarEstilo = (id) => {
-    estiloSeleccionado.value = id
-}
+    estiloSeleccionado.value = id;
+};
 
 const manejarArrastre = (event) => {
-    const archivo = event.dataTransfer.files[0]
+    const archivo = event.dataTransfer.files[0];
     if (archivo && archivo.type.startsWith('image/')) {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-            imagen.value = e.target.result
-        }
-        reader.readAsDataURL(archivo)
+        imagen.value = URL.createObjectURL(archivo); // Crear una URL para la previsualización
+        archivoSeleccionado.value = archivo; // Guardar el archivo original para subirlo
     }
-}
+};
 
 const manejarArchivo = (event) => {
-    const archivo = event.target.files[0]
+    const archivo = event.target.files[0];
     if (archivo && archivo.type.startsWith('image/')) {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-            imagen.value = e.target.result
-        }
-        reader.readAsDataURL(archivo)
+        imagen.value = URL.createObjectURL(archivo); // Crear una URL para la previsualización
+        archivoSeleccionado.value = archivo; // Guardar el archivo original para subirlo
     }
-}
+};
 
 const subirImagen = () => {
-    fileInput.value.click()
-}
+    fileInput.value.click(); // Abrir el selector de archivos
+};
 
 const convertirImagen = async () => {
     if (!estiloSeleccionado.value) {
-        alert('Por favor selecciona un estilo antes de convertir la imagen.')
-        return
+        alert('Por favor selecciona un estilo antes de convertir la imagen.');
+        return;
     }
-    if (!imagen.value) {
-        alert('Por favor selecciona o arrastra una imagen antes de convertirla.')
-        return
+    if (!archivoSeleccionado.value) {
+        alert('Por favor selecciona o arrastra una imagen antes de convertirla.');
+        return;
     }
 
-    const estilo = estilos.value.find((e) => e.id === estiloSeleccionado.value)?.nombre
-    await store.guardarImagenConvertida(imagen.value, estilo)
-}
+    try {
+        // Llamar al método del store para subir el archivo original
+        const respuesta = await store.generarLineArt(archivoSeleccionado.value);
+
+        // Mostrar un mensaje de éxito
+        alert(`Imagen subida exitosamente. Nombre del archivo procesado: ${respuesta.nombreArchivo}`);
+    } catch (error) {
+        console.error('Error al convertir la imagen:', error);
+        alert(`Error al convertir la imagen: ${error.message}`);
+    }
+};
 </script>
 
 <style scoped>

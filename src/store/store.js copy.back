@@ -1,0 +1,162 @@
+import { defineStore } from 'pinia'
+import axios from 'axios'
+
+const API_URL = 'https://localhost:44304/';
+
+export const useUserStore = defineStore('user', {
+    state: () => ({
+        usuarios: [], // Lista de usuarios
+        usuarioAutenticado: null, // Usuario autenticado
+        imagenesConvertidas: [], // Lista de imágenes convertidas
+        dibujosApiUrl: API_BASE_URL + '/api/Dibujos'
+    }),
+
+    actions: {
+
+        async generarLineArt(imageFile) { // <--- Añadido 'async' aquí
+
+            // 1. Validación de entrada (ya la tenías bien)
+            if (!imageFile || !(imageFile instanceof File)) {
+                console.error('No se ha proporcionado una imagen válida.');
+                // Es bueno lanzar un error para que el código que llama sepa que falló la validación
+                throw new Error('No se ha proporcionado una imagen válida.');
+            }
+        
+            // 2. Crear FormData (ya lo tenías bien, aunque 'file' es más común que 'image')
+            const formData = new FormData();
+            // La clave ('image' o 'file') debe coincidir con lo que espera el backend si es específico.
+            // Tu backend con `ObtenerArchivoSubido()` probablemente funcione con cualquier clave.
+            // Añadir el nombre del archivo como tercer parámetro es buena práctica.
+            formData.append('image', imageFile, imageFile.name);
+        
+            console.log(`Intentando subir imagen: ${imageFile.name}`);
+        
+            // 3. Realizar la petición dentro de un try...catch
+            try {
+                // Usamos await porque axios.post devuelve una Promise
+                const response = await axios.post(API_URL + 'api/Dibujos/subir/imagen', formData, {
+                    // Axios detecta FormData y establece Content-Type: multipart/form-data
+                    // Puedes añadir cabeceras aquí si las necesitas:
+                    // headers: { 'Authorization': 'Bearer TU_TOKEN' }
+                });
+        
+                // 4. Procesar y devolver la respuesta exitosa
+                console.log('Imagen subida y procesada con éxito:', response.data);
+                // Devuelve los datos de la respuesta para que el código que llama pueda usarlos
+                return response.data; // Debería ser algo como { nombreArchivo: "..." }
+        
+            } catch (error) {
+                // 5. Manejar errores de la petición
+                console.error('Error al subir/procesar la imagen:', error);
+        
+                // Construir un mensaje de error más útil
+                let errorMessage = 'Error desconocido al procesar la imagen.';
+                if (error.response) {
+                    // El servidor respondió con un status code de error (4xx, 5xx)
+                    errorMessage = `Error del servidor (${error.response.status}): `;
+                    // Intenta obtener el mensaje de error de la respuesta del backend
+                    if (typeof error.response.data === 'string' && error.response.data) {
+                        errorMessage += error.response.data;
+                    } else if (error.response.data && error.response.data.Message) {
+                        errorMessage += error.response.data.Message; // Común en .NET Web API
+                    } else {
+                        errorMessage += error.message;
+                    }
+                    console.error('Detalles del error:', error.response.data);
+                } else if (error.request) {
+                    // La petición se hizo pero no se recibió respuesta
+                    errorMessage = 'No se pudo conectar con el servidor. Verifica la red o CORS.';
+                } else {
+                    // Error al configurar la petición
+                    errorMessage = `Error de configuración: ${error.message}`;
+                }
+        
+                // Lanzar un nuevo error (o devolver null/undefined) para indicar el fallo
+                // Lanzar el error permite al código que llama usar su propio try/catch
+                throw new Error(errorMessage);
+                // Alternativa: podrías devolver null o un objeto de error específico
+                // return null;
+            }
+        },
+        // Obtener todos los usuarios
+        async fetchUsuarios() {
+            try {
+                const response = await axios.get('http://localhost:3000/usuarios')
+                this.usuarios = response.data
+            } catch (error) {
+                console.error('Error al obtener los usuarios:', error)
+            }
+        },
+
+        // Crear un nuevo usuario
+        async crearUsuario(nuevoUsuario) {
+            try {
+                const response = await axios.post('http://localhost:3000/usuarios', nuevoUsuario)
+                this.usuarios.push(response.data) // Añadir el nuevo usuario a la lista local
+                localStorage.setItem('usuario', JSON.stringify(response.data)) // Guardar el usuario en localStorage
+                this.usuarioAutenticado = response.data // Actualizar el estado del usuario autenticado
+            } catch (error) {
+                console.error('Error al crear el usuario:', error)
+            }
+        },
+
+        // Editar un usuario existente
+        async editarUsuario(id, datosActualizados) {
+            try {
+                await axios.put(`http://localhost:3000/usuarios/${id}`, datosActualizados)
+            } catch (error) {
+                console.error('Error al editar el usuario:', error)
+            }
+        },
+
+        // Eliminar un usuario
+        async eliminarUsuario(id) {
+            try {
+                await axios.delete(`http://localhost:3000/usuarios/${id}`)
+                this.usuarios = this.usuarios.filter((usuario) => usuario.id !== id) // Eliminar el usuario de la lista local
+                alert('Usuario eliminado exitosamente')
+            } catch (error) {
+                console.error('Error al eliminar el usuario:', error)
+            }
+        },
+
+        // Iniciar sesión
+        async iniciarSesion(correo, password) {
+            try {
+                const response = await axios.get('http://localhost:3000/usuarios')
+                const usuario = response.data.find(
+                    (u) =>
+                        u.correo.trim().toLowerCase() === correo.trim().toLowerCase() &&
+                        u.password === password
+                )
+
+                if (usuario) {
+                    localStorage.setItem('usuario', JSON.stringify(usuario)) // Guardar el usuario en localStorage
+                    this.usuarioAutenticado = usuario // Actualizar el estado del usuario autenticado
+                    return true // Inicio de sesión exitoso
+                } else {
+                    return false // Usuario o contraseña incorrectos
+                }
+            } catch (error) {
+                console.error('Error al iniciar sesión:', error)
+                return false
+            }
+        },
+
+        // Verificar si hay un usuario autenticado en localStorage
+        verificarUsuarioAutenticado() {
+            const usuario = localStorage.getItem('usuario')
+            this.usuarioAutenticado = usuario ? JSON.parse(usuario) : null
+        },
+
+        // Cerrar sesión
+        cerrarSesion() {
+            localStorage.removeItem('usuario') // Eliminar el usuario del localStorage
+            this.usuarioAutenticado = null // Limpiar el estado del usuario autenticado
+        },
+
+        
+
+    },
+
+})
