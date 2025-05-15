@@ -1,1 +1,43 @@
 interfaz de ADMIN para poder añadir estilos nuevos.
+Mejorar los mensajes de error.(animaciones)
+Terminar de hacer la BBDD
+Mejorar experiencia de usuario
+Se puede añadir un apartado de publicacion, donde los usuarios puedan enseñar las imagenes que han generado.(para publicar estaria bien tener que ir al historial, un apartado de tres puntos sobre una imagen, opciones: eliminar, descargar, publicar, informacion)
+
+
+
+TABLAS BBDD:
+
+USUARIOS
+-id
+-nomrbe
+-apellidos
+-imagen
+-contraseña
+-edad
+-telefono
+-correo 
+-planUsuario(PlanesDeUsuario.nombre)
+
+EstilosDisponibles
+-id
+-nomrbe
+-prompt 
+-imagenMuestra 
+
+PlanesDeUsuario
+-id 
+-nombre(Normal, pro, premium)
+-precio
+-editarImagenes(true/false)
+-generarImagenes(true/false)
+-accesoEstilos(1/2/3)
+
+ImagenesGeneradas
+-id 
+-fecha 
+-tipo(imagen-imagen, texto-imagen)
+-imagen(base_64)
+-id_estilo 
+-id_usuario 
+-publica(true/false)
