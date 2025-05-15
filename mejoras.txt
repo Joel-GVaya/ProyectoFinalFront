@@ -3,7 +3,7 @@ Mejorar los mensajes de error.(animaciones)
 Terminar de hacer la BBDD
 Mejorar experiencia de usuario
 Se puede añadir un apartado de publicacion, donde los usuarios puedan enseñar las imagenes que han generado.(para publicar estaria bien tener que ir al historial, un apartado de tres puntos sobre una imagen, opciones: eliminar, descargar, publicar, informacion)
-
+Se tendra que hacer que al generar una imagen, en vez de devolver su nombre, la guarde en la BBDD y devuelva su id, ya que asi el manejo posterior de esta sera bastante mas facil.
 
 
 TABLAS BBDD:

@@ -26,9 +26,23 @@
         <p v-if="!imagen">Arrastra tu imagen aquí</p>
         <img v-if="imagen" :src="imagen" alt="Previsualización" />
       </div>
+
       <button class="upload-button" @click="subirImagen">Seleccionar Imagen</button>
       <input type="file" ref="fileInput" accept="image/*" @change="manejarArchivo" hidden />
-      <button class="convert-button" :disabled="!imagen" @click="convertirImagen">Convertir Imagen</button>
+
+      <button 
+        class="convert-button" 
+        :disabled="!imagen || cargando" 
+        @click="convertirImagen"
+      >
+        <template v-if="!cargando">
+          Convertir Imagen
+        </template>
+        <template v-else>
+          <span class="loader"></span>
+          Convirtiendo...
+        </template>
+      </button>
     </main>
   </div>
 </template>
@@ -36,7 +50,7 @@
 <script>
 import { useUserStore } from "@/store/store";
 import { mapActions, mapState } from "pinia";
-import lineArtImage from "@/assets/Estilos/LineArt.jpg";
+import { useAvisosStore } from '@/store/avisos'
 
 export default {
   name: "TransformarImagen",
@@ -45,12 +59,16 @@ export default {
     return {
       estiloSeleccionado: null,
       imagen: null,
-      archivoSeleccionado: null
+      archivoSeleccionado: null,
+      cargando: false // ✅ Estado de carga
     };
   },
 
   computed: {
-    ...mapState(useUserStore, ["estilos"])
+    ...mapState(useUserStore, ["estilos"]),
+    avisos() {
+            return useAvisosStore();  // Esto te dará acceso al store directamente
+        }
   },
 
   methods: {
@@ -81,8 +99,9 @@ export default {
     },
 
     async convertirImagen() {
+      const avisos = useAvisosStore()
       if (!this.estiloSeleccionado) {
-        alert("Por favor selecciona un estilo antes de convertir la imagen.");
+        avisos.mostrarAviso({ mensaje: 'Por favor selecciona un estilo antes de convertir la imagen.', tipo: 'info' })
         return;
       }
       if (!this.archivoSeleccionado) {
@@ -90,12 +109,16 @@ export default {
         return;
       }
 
+      this.cargando = true; // ✅ Activar spinner
+
       try {
         const respuesta = await this.generarLineArt(this.archivoSeleccionado);
-        alert(`Imagen subida exitosamente. Nombre del archivo procesado: ${respuesta.nombreArchivo}`);
+        this.$router.push({ name: 'MostrarImagen', params: { id: respuesta.nombreArchivo } });
       } catch (error) {
         console.error("Error al convertir la imagen:", error);
         alert(`Error al convertir la imagen: ${error.message}`);
+      } finally {
+        this.cargando = false; // ✅ Desactivar spinner
       }
     },
   },
@@ -114,26 +137,25 @@ export default {
 .sidebar {
     margin: 5px;
     width: 20%;
-    background-color: #d1c4e9; /* Morado claro */
+    background-color: #d1c4e9;
     padding: 1rem;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    overflow-y: auto; /* Permite scroll si hay muchos estilos */
-    border: 4px solid #6a1b9a; /* Borde morado */
-    border-radius: 12px; /* Bordes redondeados */
+    overflow-y: auto;
+    border: 4px solid #6a1b9a;
+    border-radius: 12px;
 }
 
 .sidebar h2 {
-    color: #6a1b9a; /* Morado */
+    color: #6a1b9a;
     margin-bottom: 1rem;
     font-size: 1.5rem;
     text-align: center;
 }
 
-
 .sidebar ul {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Dos columnas */
-    gap: 1rem; /* Espaciado entre elementos */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
     list-style: none;
     padding: 0;
     margin: 0;
@@ -152,11 +174,11 @@ export default {
 }
 
 .sidebar li:hover {
-    background-color: #a5d6a7; /* Verde claro */
+    background-color: #a5d6a7;
 }
 
 .sidebar li.selected {
-    background-color: #22b1bba1; /* Morado */
+    background-color: #22b1bba1;
     color: white;
 }
 
@@ -188,7 +210,7 @@ export default {
 .drop-area {
     width: 80%;
     height: 300px;
-    border: 2px dashed #6a1b9a; /* Morado */
+    border: 2px dashed #6a1b9a;
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -202,7 +224,7 @@ export default {
 }
 
 .drop-area:hover {
-    background-color: #f3e5f5; /* Morado claro */
+    background-color: #f3e5f5;
 }
 
 .drop-area img {
@@ -211,8 +233,9 @@ export default {
     border-radius: 8px;
 }
 
-.upload-button, .convert-button {
-    background-color: #a5d6a7; /* Verde claro */
+.upload-button,
+.convert-button {
+    background-color: #a5d6a7;
     color: #424242;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -222,15 +245,35 @@ export default {
     font-weight: bold;
     margin-bottom: 1rem;
     transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.upload-button:hover, .convert-button:hover {
-    background-color: #81c784; /* Verde más oscuro */
+.upload-button:hover,
+.convert-button:hover {
+    background-color: #81c784;
     transform: scale(1.05);
 }
 
 .convert-button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
+}
+
+.loader {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #ccc;
+    border-top: 3px solid #6a1b9a;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 </style>

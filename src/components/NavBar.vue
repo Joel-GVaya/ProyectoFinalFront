@@ -10,17 +10,17 @@
       <div class="dropdown-menu" v-if="menuAbierto">
         <ul>
           <li class="opcion-usuario">
-            <router-link to="/perfil" @click="closeMenu">
+            <router-link to="/perfil" @click.native="closeMenu">
               <a><span class="material-icons">account_circle</span> Perfil</a>
             </router-link>
           </li>
           <li class="opcion-usuario">
-            <router-link to="/historial" @click="closeMenu">
+            <router-link to="/historial" @click.native="closeMenu">
               <span class="material-icons">schedule</span> Historial
             </router-link>
           </li>
           <li class="opcion-usuario">
-            <router-link to="/planes" @click="closeMenu">
+            <router-link to="/planes" @click.native="closeMenu">
               <span class="material-icons">bolt</span> Planes
             </router-link>
           </li>
@@ -46,67 +46,66 @@
       <li><router-link to="/">Home</router-link></li>
       <li v-if="usuario"><router-link to="/generar-imagen">Generar Imagen</router-link></li>
       <li v-if="usuario"><router-link to="/transformar-imagen">Transformar Imagen</router-link></li>
-      <li><router-link to="/publicaciones">Publicaciones</router-link></li>
+      <li><router-link to="/publicaciones">Arte Generado</router-link></li>
       <li><router-link to="/about-us">About Us</router-link></li>
     </ul>
   </nav>
 </template>
 
 <script>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useUserStore } from '@/store/store.js'
 import defaultUserImage from '@/assets/defaultUser.png'
 
 export default {
   name: 'AppHeader',
 
-  setup() {
-    const menuAbierto = ref(false)
-    const menuRef = ref(null)
-
-    const userStore = useUserStore()
-    const usuario = userStore.usuario
-
-    const toggleMenu = () => {
-      menuAbierto.value = !menuAbierto.value
+  data() {
+    return {
+      menuAbierto: false,
     }
+  },
 
-    const closeMenu = () => {
-      menuAbierto.value = false
+  computed: {
+    userStore() {
+      return useUserStore()
+    },
+    usuario() {
+      return this.userStore.usuario
+    },
+    defaultUserImage() {
+      return defaultUserImage
     }
+  },
 
-    const logout = () => {
-      userStore.cerrarSesion()
-      closeMenu()
-      window.location.href = '/' // O usa this.$router.push si tienes acceso
-    }
-
-    const handleClickOutside = (event) => {
-      if (menuRef.value && !menuRef.value.contains(event.target)) {
-        closeMenu()
+  methods: {
+    toggleMenu() {
+      this.menuAbierto = !this.menuAbierto
+    },
+    closeMenu() {
+      this.menuAbierto = false
+    },
+    logout() {
+      this.userStore.cerrarSesion()
+      this.closeMenu()
+      this.$router.push('/')
+    },
+    handleClickOutside(event) {
+      if (this.$refs.menuRef && !this.$refs.menuRef.contains(event.target)) {
+        this.closeMenu()
       }
     }
+  },
 
-    onMounted(() => {
-      document.addEventListener('click', handleClickOutside)
-    })
+  mounted() {
+    document.addEventListener('click', this.handleClickOutside)
+  },
 
-    onBeforeUnmount(() => {
-      document.removeEventListener('click', handleClickOutside)
-    })
-
-    return {
-      usuario,
-      menuAbierto,
-      toggleMenu,
-      closeMenu,
-      logout,
-      menuRef,
-      defaultUserImage
-    }
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleClickOutside)
   }
 }
 </script>
+
 
 <style scoped>
 /* General styles */
