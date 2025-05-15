@@ -8,6 +8,7 @@ import Registro from '../components/Registro.vue'
 import Perfil from '../components/Perfil.vue'
 import Planes from '../components/Planes.vue'
 import Historial from '../components/HistorialImagenesUsuario.vue'
+import Publicaciones from '../components/Publicaciones.vue'
 
 const routes = [
   {
@@ -55,6 +56,11 @@ const routes = [
     name: 'Historial',
     component: Historial,
   },
+  {
+    path: '/publicaciones',
+    name: 'Publicaciones',
+    component: Publicaciones,
+  }
 ]
 
 const router = createRouter({

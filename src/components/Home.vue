@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <header class="hero">
+    <header v-if="!usuario" class="hero">
       <h1>Descubre el Poder de Dibujos Colorear</h1>
       <p>Convierte tus imágenes en obras de arte únicas o genera imágenes increíbles a partir de texto.</p>
       <router-link to="/registro" class="cta-button">¡Regístrate y Prueba Ahora!</router-link>
@@ -21,6 +21,12 @@
       <p>Escribe una descripción y observa cómo nuestra IA la convierte en una imagen impresionante.</p>
       <router-link to="/generar-imagen" class="cta-button">Prueba la Generación de Texto a Imagen</router-link>
     </section>
+
+    <section class="image-to-image">
+      <h2>Transforma tus propias imagenes!</h2>
+      <p>Puedes proporcionarnos una imagen propia, seleccionar el estilo que te guste y convertirla!.</p>
+      <router-link to="/transformar-imagen" class="cta-button">Prueba la Generación de Imagen a Imagen</router-link>
+    </section>
   </div>
 </template>
 
@@ -35,11 +41,10 @@ import { useAvisosStore } from '@/store/avisos'
 export default {
   name: 'HomeView',
   computed: {
-    ...mapState(useUserStore, ["estilos"])
+    ...mapState(useUserStore, ["estilos", "usuario"])
   },
   mounted() {
     const avisos = useAvisosStore()
-    avisos.mostrarAviso({ mensaje: 'Bienvenido a Dibujos Colorear', tipo: 'info' })
   }
 }
 </script>
@@ -141,6 +146,25 @@ export default {
 }
 
 .text-to-image p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+/*Image-to-Image*/
+.image-to-image {
+    background-color: #d1c4e9; /* Morado claro */
+    padding: 2rem;
+    border-radius: 12px;
+    margin-top: 20px;
+}
+
+.image-to-image h2 {
+    font-size: 2rem;
+    color: #6a1b9a; /* Morado */
+    margin-bottom: 1rem;
+}
+
+.image-to-image p {
     font-size: 1.2rem;
     margin-bottom: 2rem;
 }

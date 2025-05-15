@@ -23,8 +23,8 @@ const { eliminarAviso } = avisosStore
 
 <style scoped>
 .avisos-container {
-  position: fixed;
-  top: 7rem; /* Cambié esto para moverlo más abajo */
+  position: absolute;
+  top: 8rem; /* Cambié esto para moverlo más abajo */
   right: 1rem;
   display: flex;
   flex-direction: column;

@@ -66,40 +66,44 @@
 
 <script>
 import { useUserStore } from '@/store/store.js'
-import { mapStores, mapActions } from "pinia";
+import { mapActions } from "pinia"
+import { useAvisosStore } from '@/store/avisos'
 
 export default {
     name: 'Perfil',
 
     data() {
-        // Obtén el usuario del localStorage
-        const usuario = JSON.parse(localStorage.getItem("usuario")) || null;
-
+        const usuario = JSON.parse(localStorage.getItem("usuario")) || null
         return {
-            usuario,  // Se guarda como propiedad en data()
-            nombre: usuario ? usuario.nombre : '',
-            apellidos: usuario ? usuario.apellidos : '',
-            edad: usuario ? usuario.edad : null,
-            telefono: usuario ? usuario.telefono : '',
-            correo: usuario ? usuario.correo : '',
-            imagen: usuario ? usuario.imagen : '',
+            usuario,
+            nombre: usuario?.nombre || '',
+            apellidos: usuario?.apellidos || '',
+            edad: usuario?.edad || null,
+            telefono: usuario?.telefono || '',
+            correo: usuario?.correo || '',
+            imagen: usuario?.imagen || '',
             nuevaPassword: '',
             confirmarPassword: '',
             password: '',
-            error: '',
             credencialesEditables: false,
             mostrarVerificacion: false,
         }
     },
 
+    computed: {
+        avisos() {
+            return useAvisosStore();  // Esto te dará acceso al store directamente
+        }
+    },
 
     methods: {
         ...mapActions(useUserStore, ["iniciarSesion"]),
+
         handleImage(e) {
             const file = e.target.files[0]
             if (!file) return
             const reader = new FileReader()
-            reader.onload = (ev) => {
+            reader.onload = ev => {
                 this.imagen = ev.target.result
             }
             reader.readAsDataURL(file)
@@ -110,26 +114,24 @@ export default {
         },
 
         guardarCambios() {
-            // Validaciones básicas
+            const avisos = useAvisosStore()
+
             if (!this.nombre || !this.apellidos || !this.edad || !this.telefono || !this.correo) {
-                alert('Por favor, completa todos los campos obligatorios.')
+                avisos.mostrarAviso({ mensaje: 'Por favor, completa todos los campos obligatorios.', tipo: 'info' })
                 return
             }
 
-            // Validación de la nueva contraseña
             if (this.nuevaPassword && this.nuevaPassword !== this.confirmarPassword) {
-                alert('Las contraseñas no coinciden. Por favor, verifica e inténtalo de nuevo.')
+                avisos.mostrarAviso({ mensaje: 'Las contraseñas no coinciden.', tipo: 'error' })
                 return
             }
 
-            // Validación de contraseña mínima (si se incluye una nueva contraseña)
             if (this.nuevaPassword && this.nuevaPassword.length < 6) {
-                alert('La nueva contraseña debe tener al menos 6 caracteres.')
+                avisos.mostrarAviso({ mensaje: 'La nueva contraseña debe tener al menos 6 caracteres.', tipo: 'error' })
                 return
             }
 
             try {
-                // Datos actualizados
                 const datosActualizados = {
                     id: this.usuario.id,
                     nombre: this.nombre,
@@ -137,41 +139,34 @@ export default {
                     correo: this.correo,
                     edad: this.edad,
                     telefono: this.telefono,
-                    password: this.nuevaPassword !== '' ? this.nuevaPassword : this.usuario.password, // Si no hay nueva contraseña, se mantiene la actual
-                    imagen: this.imagen, // Foto de perfil
+                    password: this.nuevaPassword !== '' ? this.nuevaPassword : this.usuario.password,
+                    imagen: this.imagen,
                 }
 
-                const userStore = useUserStore();
+                const userStore = useUserStore()
+                userStore.editarUsuario(datosActualizados.id, datosActualizados)
 
-                // Llamada a la acción de Pinia para editar el usuario
-                userStore.editarUsuario(datosActualizados.id, datosActualizados);
+                avisos.mostrarAviso({ mensaje: 'Datos actualizados correctamente.', tipo: 'info' })
 
-                // Actualizar la información del usuario en el store
                 Object.assign(this.usuario, datosActualizados)
-
-                // Limpiar los campos de contraseña
                 this.nuevaPassword = ''
                 this.confirmarPassword = ''
-
-                // Cerrar la edición de credenciales
                 this.credencialesEditables = false
 
-                // Notificación de éxito
-                alert('Cambios guardados exitosamente.')
+                window.location.reload();
             } catch (e) {
-                // Manejo de errores
-                console.error('Error al guardar los cambios:', e)
-                alert('Error al guardar los cambios. Por favor, intenta nuevamente.')
+                avisos.mostrarAviso({ mensaje: 'Error al guardar los cambios.', tipo: 'error' })
             }
         },
 
         verificarCredenciales() {
+            const avisos = useAvisosStore()
             if (this.password === this.usuario.password) {
                 this.credencialesEditables = true
                 this.mostrarVerificacion = false
                 this.password = ''
             } else {
-                alert('Contraseña incorrecta.')
+                avisos.mostrarAviso({ mensaje: 'Contraseña incorrecta.', tipo: 'error' })
             }
         },
 
@@ -182,6 +177,7 @@ export default {
     },
 }
 </script>
+
 
 
 <style scoped>
