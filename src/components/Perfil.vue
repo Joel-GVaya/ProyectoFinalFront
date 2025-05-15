@@ -43,13 +43,13 @@
             </div>
             <div class="form-group imagen-group">
                 <label for="imagen">Foto de perfil:</label>
-                <input type="file" id="imagen" accept="image/*" @change="handleImage" />
                 <img
                     v-if="imagen"
                     :src="imagen"
                     alt="preview"
                     class="imagen-preview"
-                />
+                /><br>
+                <input type="file" id="imagen" accept="image/*" @change="handleImage" />
                 <button
                     v-if="imagen"
                     type="button"
@@ -269,6 +269,7 @@ input {
     margin-top: 10px;
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    align-self: center; /* Centrar la imagen */
 }
 
 /* Botones */

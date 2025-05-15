@@ -1,19 +1,27 @@
 <script setup>
 import NavBar from './components/NavBar.vue'
-import { onMounted } from 'vue'
+import Aviso from './components/Aviso.vue' // Asegúrate de esta ruta
+import { onMounted, ref } from 'vue'
 import { useUserStore } from '@/store/store.js'
 
 const userStore = useUserStore()
+const avisosRef = ref(null)
 
 onMounted(() => {
   userStore.populateEstilos()
 })
+
+// Función global para mostrar avisos
+function mostrarAviso(mensaje) {
+  avisosRef.value?.agregarAviso(mensaje)
+}
 </script>
 
 <template>
   <div id="app">
     <NavBar />
-    <router-view />
+    <Aviso />
+    <router-view @avisar="mostrarAviso" />
   </div>
 </template>
 

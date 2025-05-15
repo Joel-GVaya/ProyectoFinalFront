@@ -30,11 +30,16 @@ import { mapStores, mapActions, mapState } from "pinia";
 import lineArtExample from '@/assets/Estilos/LineArt.jpg'
 import animeExample from '@/assets/Estilos/LineArt.jpg'
 import pixarExample from '@/assets/Estilos/LineArt.jpg'
+import { useAvisosStore } from '@/store/avisos'
 
 export default {
   name: 'HomeView',
   computed: {
     ...mapState(useUserStore, ["estilos"])
+  },
+  mounted() {
+    const avisos = useAvisosStore()
+    avisos.mostrarAviso({ mensaje: 'Bienvenido a Dibujos Colorear', tipo: 'info' })
   }
 }
 </script>
