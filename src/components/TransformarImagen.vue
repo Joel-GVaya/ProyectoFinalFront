@@ -1,103 +1,104 @@
 <template>
-    <div class="transformar-imagen">
-        <!-- Barra lateral -->
-        <aside class="sidebar">
-            <h2>Estilos</h2>
-            <ul>
-                <li 
-                    v-for="estilo in estilos" 
-                    :key="estilo.id" 
-                    :class="{ selected: estiloSeleccionado === estilo.id }"
-                    @click="seleccionarEstilo(estilo.id)"
-                >
-                    <img :src="estilo.imagen" alt="Estilo" class="style-image" />
-                    <p >{{ estilo.nombre }}</p>
-                </li>
-            </ul>
-        </aside>
+  <div class="transformar-imagen">
+    <!-- Barra lateral -->
+    <aside class="sidebar">
+      <h2>Estilos</h2>
+      <ul>
+        <li 
+          v-for="estilo in estilos" 
+          :key="estilo.id" 
+          :class="{ selected: estiloSeleccionado === estilo.id }"
+          @click="seleccionarEstilo(estilo.id)"
+        >
+          <img :src="estilo.imagen" alt="Estilo" class="style-image" />
+          <p>{{ estilo.nombre }}</p>
+        </li>
+      </ul>
+    </aside>
 
-        <!-- Área principal -->
-        <main class="main-content">
-            <div 
-                class="drop-area" 
-                @dragover.prevent 
-                @drop.prevent="manejarArrastre"
-            >
-                <p v-if="!imagen">Arrastra tu imagen aquí</p>
-                <img v-if="imagen" :src="imagen" alt="Previsualización" />
-            </div>
-            <button class="upload-button" @click="subirImagen">Seleccionar Imagen</button>
-            <input type="file" ref="fileInput" accept="image/*" @change="manejarArchivo" hidden />
-            <button class="convert-button" :disabled="!imagen" @click="convertirImagen">Convertir Imagen</button>
-        </main>
-    </div>
+    <!-- Área principal -->
+    <main class="main-content">
+      <div 
+        class="drop-area" 
+        @dragover.prevent 
+        @drop.prevent="manejarArrastre"
+      >
+        <p v-if="!imagen">Arrastra tu imagen aquí</p>
+        <img v-if="imagen" :src="imagen" alt="Previsualización" />
+      </div>
+      <button class="upload-button" @click="subirImagen">Seleccionar Imagen</button>
+      <input type="file" ref="fileInput" accept="image/*" @change="manejarArchivo" hidden />
+      <button class="convert-button" :disabled="!imagen" @click="convertirImagen">Convertir Imagen</button>
+    </main>
+  </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
-import { useUserStore } from '@/store/store.js'; // Importa el store
+<script>
+import { useUserStore } from "@/store/store";
+import { mapActions, mapState } from "pinia";
+import lineArtImage from "@/assets/Estilos/LineArt.jpg";
 
-// Obtén la instancia del store
-const store = useUserStore();
+export default {
+  name: "TransformarImagen",
 
-// Importar las imágenes directamente
-import lineArtImage from '@/assets/Estilos/LineArt.jpg';
+  data() {
+    return {
+      estiloSeleccionado: null,
+      imagen: null,
+      archivoSeleccionado: null
+    };
+  },
 
-const estilos = ref([
-    { id: 1, nombre: 'LineArt', imagen: lineArtImage },
-    { id: 2, nombre: 'Pixar', imagen: lineArtImage },
-    { id: 3, nombre: 'Anime', imagen: lineArtImage }
-]);
+  computed: {
+    ...mapState(useUserStore, ["estilos"])
+  },
 
-const estiloSeleccionado = ref(null);
-const imagen = ref(null);
-const fileInput = ref(null); // Referencia al elemento DOM <input>
-const archivoSeleccionado = ref(null); // Almacena el archivo seleccionado
+  methods: {
+    ...mapActions(useUserStore, ["generarLineArt"]),
 
-const seleccionarEstilo = (id) => {
-    estiloSeleccionado.value = id;
-};
+    seleccionarEstilo(id) {
+      this.estiloSeleccionado = id;
+    },
 
-const manejarArrastre = (event) => {
-    const archivo = event.dataTransfer.files[0];
-    if (archivo && archivo.type.startsWith('image/')) {
-        imagen.value = URL.createObjectURL(archivo); // Crear una URL para la previsualización
-        archivoSeleccionado.value = archivo; // Guardar el archivo original para subirlo
-    }
-};
+    manejarArrastre(event) {
+      const archivo = event.dataTransfer.files[0];
+      if (archivo && archivo.type.startsWith("image/")) {
+        this.imagen = URL.createObjectURL(archivo);
+        this.archivoSeleccionado = archivo;
+      }
+    },
 
-const manejarArchivo = (event) => {
-    const archivo = event.target.files[0];
-    if (archivo && archivo.type.startsWith('image/')) {
-        imagen.value = URL.createObjectURL(archivo); // Crear una URL para la previsualización
-        archivoSeleccionado.value = archivo; // Guardar el archivo original para subirlo
-    }
-};
+    manejarArchivo(event) {
+      const archivo = event.target.files[0];
+      if (archivo && archivo.type.startsWith("image/")) {
+        this.imagen = URL.createObjectURL(archivo);
+        this.archivoSeleccionado = archivo;
+      }
+    },
 
-const subirImagen = () => {
-    fileInput.value.click(); // Abrir el selector de archivos
-};
+    subirImagen() {
+      this.$refs.fileInput.click();
+    },
 
-const convertirImagen = async () => {
-    if (!estiloSeleccionado.value) {
-        alert('Por favor selecciona un estilo antes de convertir la imagen.');
+    async convertirImagen() {
+      if (!this.estiloSeleccionado) {
+        alert("Por favor selecciona un estilo antes de convertir la imagen.");
         return;
-    }
-    if (!archivoSeleccionado.value) {
-        alert('Por favor selecciona o arrastra una imagen antes de convertirla.');
+      }
+      if (!this.archivoSeleccionado) {
+        alert("Por favor selecciona o arrastra una imagen antes de convertirla.");
         return;
-    }
+      }
 
-    try {
-        // Llamar al método del store para subir el archivo original
-        const respuesta = await store.generarLineArt(archivoSeleccionado.value);
-
-        // Mostrar un mensaje de éxito
+      try {
+        const respuesta = await this.generarLineArt(this.archivoSeleccionado);
         alert(`Imagen subida exitosamente. Nombre del archivo procesado: ${respuesta.nombreArchivo}`);
-    } catch (error) {
-        console.error('Error al convertir la imagen:', error);
+      } catch (error) {
+        console.error("Error al convertir la imagen:", error);
         alert(`Error al convertir la imagen: ${error.message}`);
-    }
+      }
+    },
+  },
 };
 </script>
 
@@ -155,7 +156,7 @@ const convertirImagen = async () => {
 }
 
 .sidebar li.selected {
-    background-color: #6a1b9a; /* Morado */
+    background-color: #22b1bba1; /* Morado */
     color: white;
 }
 

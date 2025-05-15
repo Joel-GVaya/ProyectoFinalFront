@@ -7,6 +7,7 @@ import IniciarSesion from '../components/IniciarSesion.vue'
 import Registro from '../components/Registro.vue'
 import Perfil from '../components/Perfil.vue'
 import Planes from '../components/Planes.vue'
+import Historial from '../components/HistorialImagenesUsuario.vue'
 
 const routes = [
   {
@@ -48,6 +49,11 @@ const routes = [
     path: '/planes',
     name: 'Planes',
     component: Planes,
+  },
+  {
+    path: '/historial',
+    name: 'Historial',
+    component: Historial,
   },
 ]
 

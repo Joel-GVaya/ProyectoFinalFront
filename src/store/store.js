@@ -6,11 +6,23 @@ const API_URL = 'https://localhost:44304/';
 export const useUserStore = defineStore('user', {
     state: () => ({
         usuarios: [],
-        usuarioAutenticado: null,
         imagenesConvertidas: [],
+        estilos: [],
+        usuario: JSON.parse(localStorage.getItem("usuario")) || null,
     }),
+    
 
     actions: {
+
+        async populateEstilos(){
+            try{
+                const response = await axios.get('http://localhost:3000/estilosDisponibles')
+                this.estilos = response.data
+            }catch(error){
+                console.log('Error al obtener los estilos disponibles' + error)
+            }
+            
+        },
 
         async generarLineArt(imageFile) {
             if (!imageFile || !(imageFile instanceof File)) {
@@ -73,6 +85,7 @@ export const useUserStore = defineStore('user', {
 
         async editarUsuario(id, datosActualizados) {
             try {
+                console.log('Datos actualizados:', datosActualizados)
                 await axios.put(`http://localhost:3000/usuarios/${id}`, datosActualizados)
             } catch (error) {
                 console.error('Error al editar el usuario:', error)
@@ -91,16 +104,16 @@ export const useUserStore = defineStore('user', {
 
         async iniciarSesion(correo, password) {
             try {
-                const response = await axios.get('http://localhost:3000/usuarios')
+                const response = await axios.get('http://localhost:3000/usuarios?correo=' + correo)
+                console.log('http://localhost:3000/usuarios?correo=' + correo, response)
                 const usuario = response.data.find(
                     (u) =>
-                        u.correo.trim().toLowerCase() === correo.trim().toLowerCase() &&
                         u.password === password
                 )
 
                 if (usuario) {
+                    this.usuario = usuario;
                     localStorage.setItem('usuario', JSON.stringify(usuario))
-                    this.usuarioAutenticado = usuario
                     return true
                 } else {
                     return false
@@ -119,7 +132,7 @@ export const useUserStore = defineStore('user', {
         // Cerrar sesión
         cerrarSesion() {
             localStorage.removeItem('usuario')
-            this.usuarioAutenticado = null
+            this.usuario = null
         },
 
         

@@ -1,5 +1,13 @@
 <script setup>
 import NavBar from './components/NavBar.vue'
+import { onMounted } from 'vue'
+import { useUserStore } from '@/store/store.js'
+
+const userStore = useUserStore()
+
+onMounted(() => {
+  userStore.populateEstilos()
+})
 </script>
 
 <template>

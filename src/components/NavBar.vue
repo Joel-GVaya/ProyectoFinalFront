@@ -1,72 +1,92 @@
 <template>
-    <header class="app-header">
-        <img src="@/assets/Pixalchemy.png" alt="Logo de la App" class="app-logo" />
-        <div class="user-menu">
-            <!-- Mostrar icono de usuario si está autenticado -->
-            <template v-if="store.usuarioAutenticado">
-                <img :src="store.usuarioAutenticado.imagen || defaultUserImage" alt="perfil" class="user-icon" @click="toggleMenu" />
-                <div class="dropdown-menu" v-if="menuAbierto">
-                    <ul>
-                        <li class="opcion-usuario">
-                            <router-link to="/perfil" @click="closeMenu">
-                                <span class="material-icons" style="vertical-align: middle; margin-right: 6px;">account_circle</span>
-                                Perfil
-                            </router-link>
-                        </li>
-                        <li class="opcion-usuario">
-                            <router-link to="/planes" @click="closeMenu">
-                                <span class="material-icons" style="vertical-align: middle; margin-right: 6px;">bolt</span>
-                                Planes
-                            </router-link>
-                        </li>
-                        <li @click="cerrarSesion" class="opcion-usuario cerrar-sesion">
-                            <span class="material-icons" style="vertical-align: middle; margin-right: 6px;">logout</span>
-                            Log Out
-                        </li>
-                    </ul>
-                </div>
-            </template>
-
-            <!-- Mostrar botones de Iniciar Sesión y Registrarse si no hay usuario -->
-            <template v-else>
-                <router-link to="/iniciar-sesion" class="auth-button">Log In</router-link>
-                <router-link to="/registro" class="auth-button">Register</router-link>
-            </template>
+  <header class="app-header">
+    <img src="@/assets/Pixalchemy.png" alt="Logo de la App" class="app-logo" />
+    <div class="user-menu">
+      <template v-if="usuario">
+        <img :src="usuario.imagen || defaultUserImage" alt="perfil" class="user-icon" @click="toggleMenu" />
+        <div class="dropdown-menu" v-if="menuAbierto">
+          <ul>
+            <li class="opcion-usuario">
+              <router-link to="/perfil" @click="closeMenu">
+                <span class="material-icons" style="vertical-align: middle; margin-right: 6px;">account_circle</span>
+                Perfil
+              </router-link>
+            </li>
+            <li class="opcion-usuario">
+              <router-link to="/historial" @click="closeMenu">
+                <span class="material-icons" style="vertical-align: middle; margin-right: 6px;">schedule</span>
+                Historial
+              </router-link>
+            </li>
+            <li class="opcion-usuario">
+              <router-link to="/planes" @click="closeMenu">
+                <span class="material-icons" style="vertical-align: middle; margin-right: 6px;">bolt</span>
+                Planes
+              </router-link>
+            </li>
+            <li @click="logout" class="opcion-usuario cerrar-sesion">
+              <span class="material-icons" style="vertical-align: middle; margin-right: 6px;">logout</span>
+              Log Out
+            </li>
+          </ul>
         </div>
-    </header>
-    <nav class="navbar">
-        <ul>
-            <li><router-link to="/">Home</router-link></li>
-            <li v-if="store.usuarioAutenticado"><router-link to="/generar-imagen">Generar Imagen</router-link></li>
-            <li v-if="store.usuarioAutenticado"><router-link to="/transformar-imagen">Transformar Imagen</router-link></li>
-            <li><router-link to="/about-us">About Us</router-link></li>
-        </ul>
-    </nav>
+      </template>
+
+      <template v-else>
+        <router-link to="/iniciar-sesion" class="auth-button">Log In</router-link>
+        <router-link to="/registro" class="auth-button">Register</router-link>
+      </template>
+    </div>
+  </header>
+
+  <nav class="navbar">
+    <ul>
+      <li><router-link to="/">Home</router-link></li>
+      <li v-if="usuario"><router-link to="/generar-imagen">Generar Imagen</router-link></li>
+      <li v-if="usuario"><router-link to="/transformar-imagen">Transformar Imagen</router-link></li>
+      <li><router-link to="/about-us">About Us</router-link></li>
+    </ul>
+  </nav>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-import { useUserStore } from '@/store/store.js'
-import { useRouter } from 'vue-router'
-import defaultUserImage from '@/assets/defaultUser.png'
+<script>
+import { useUserStore } from "@/store/store.js";
+import { mapState, mapActions } from "pinia";
+import defaultUserImage from "@/assets/defaultUser.png";
 
-const store = useUserStore()
-const router = useRouter()
-const menuAbierto = ref(false)
+export default {
+  name: "AppHeader",
 
-const toggleMenu = () => {
-    menuAbierto.value = !menuAbierto.value
-}
+  data() {
+    return {
+      menuAbierto: false,
+      defaultUserImage,
+    };
+  },
 
-const closeMenu = () => {
-    menuAbierto.value = false
-}
+  computed: {
+    ...mapState(useUserStore, ["usuario"]),
+  },
 
-const cerrarSesion = () => {
-    store.cerrarSesion()
-    router.push('/')
-    closeMenu()
-}
+  methods: {
+    ...mapActions(useUserStore, ['cerrarSesion']), // Mapear la acción 'cerrarSesion'
+
+    toggleMenu() {
+      this.menuAbierto = !this.menuAbierto;
+    },
+
+    closeMenu() {
+      this.menuAbierto = false;
+    },
+
+    // Método para cerrar sesión, utilizando la acción 'cerrarSesion'
+    logout() {
+      this.cerrarSesion(); // Llamar la acción directamente
+      this.$router.push("/"); // Redirige a la página principal
+      this.closeMenu(); // Cierra el menú
+    },
+  },
+};
 </script>
 
 <style scoped>

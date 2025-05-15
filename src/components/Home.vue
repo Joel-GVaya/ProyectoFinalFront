@@ -1,40 +1,44 @@
 <template>
-    <div class="home">
-        <header class="hero">
-            <h1>Descubre el Poder de Dibujos Colorear</h1>
-            <p>Convierte tus imágenes en obras de arte únicas o genera imágenes increíbles a partir de texto.</p>
-            <router-link to="/registro" class="cta-button">¡Regístrate y Prueba Ahora!</router-link>
-        </header>
+  <div class="home">
+    <header class="hero">
+      <h1>Descubre el Poder de Dibujos Colorear</h1>
+      <p>Convierte tus imágenes en obras de arte únicas o genera imágenes increíbles a partir de texto.</p>
+      <router-link to="/registro" class="cta-button">¡Regístrate y Prueba Ahora!</router-link>
+    </header>
 
-        <section class="examples">
-            <h2>Explora Nuestros Estilos</h2>
-            <div class="examples-grid">
-                <div class="example-card" v-for="ejemplo in ejemplos" :key="ejemplo.id">
-                    <img :src="ejemplo.imagen" :alt="ejemplo.nombre" class="example-image" />
-                    <p>{{ ejemplo.nombre }}</p>
-                </div>
-            </div>
-        </section>
+    <section class="examples">
+      <h2>Explora Nuestros Estilos</h2>
+      <div class="examples-grid">
+        <div class="example-card" v-for="estilo in estilos" :key="estilo.id">
+          <img :src="estilo.imagen" :alt="estilo.nombre" class="example-image" />
+          <p>{{ estilo.nombre }}</p>
+        </div>
+      </div>
+    </section>
 
-        <section class="text-to-image">
-            <h2>Genera Imágenes a Partir de Texto</h2>
-            <p>Escribe una descripción y observa cómo nuestra IA la convierte en una imagen impresionante.</p>
-            <router-link to="/generar-imagen" class="cta-button">Prueba la Generación de Texto a Imagen</router-link>
-        </section>
-    </div>
+    <section class="text-to-image">
+      <h2>Genera Imágenes a Partir de Texto</h2>
+      <p>Escribe una descripción y observa cómo nuestra IA la convierte en una imagen impresionante.</p>
+      <router-link to="/generar-imagen" class="cta-button">Prueba la Generación de Texto a Imagen</router-link>
+    </section>
+  </div>
 </template>
 
-<script setup>
+<script>
+import { useUserStore } from '@/store/store.js'
+import { mapStores, mapActions, mapState } from "pinia";
 import lineArtExample from '@/assets/Estilos/LineArt.jpg'
 import animeExample from '@/assets/Estilos/LineArt.jpg'
 import pixarExample from '@/assets/Estilos/LineArt.jpg'
 
-const ejemplos = [
-    { id: 1, nombre: 'LineArt', imagen: lineArtExample },
-    { id: 2, nombre: 'Anime', imagen: animeExample },
-    { id: 3, nombre: 'Pixar', imagen: pixarExample }
-]
+export default {
+  name: 'HomeView',
+  computed: {
+    ...mapState(useUserStore, ["estilos"])
+  }
+}
 </script>
+
 
 <style scoped>
 /* Estilo general del Home */
@@ -110,11 +114,13 @@ const ejemplos = [
 }
 
 .example-image {
-    width: 100%;
-    height: auto;
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
     border-radius: 8px;
     margin-bottom: 0.5rem;
 }
+
 
 /* Text-to-Image Section */
 .text-to-image {

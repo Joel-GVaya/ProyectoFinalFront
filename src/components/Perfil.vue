@@ -91,83 +91,125 @@
     </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script>
 import { useUserStore } from '@/store/store.js'
+import { mapStores, mapActions } from "pinia";
 
-const store = useUserStore()
+export default {
+  name: 'Perfil',
 
-const nombre = ref(store.usuarioAutenticado.nombre)
-const apellidos = ref(store.usuarioAutenticado.apellidos || '')
-const edad = ref(store.usuarioAutenticado.edad)
-const telefono = ref(store.usuarioAutenticado.telefono)
-const correo = ref(store.usuarioAutenticado.correo)
-const nuevaPassword = ref('')
-const confirmarPassword = ref('') // Nueva variable para confirmar la contraseña
-const imagen = ref(store.usuarioAutenticado.imagen || '')
-const password = ref('')
-const error = ref('')
+  data() {
+    // Obtén el usuario del localStorage
+    const usuario = JSON.parse(localStorage.getItem("usuario")) || null;
 
-const credencialesEditables = ref(false)
-const mostrarVerificacion = ref(false)
-
-const handleImage = (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-        imagen.value = ev.target.result
+    return {
+        usuario,  // Se guarda como propiedad en data()
+        nombre: usuario ? usuario.nombre : '',
+        apellidos: usuario ? usuario.apellidos : '',
+        edad: usuario ? usuario.edad : null,
+        telefono: usuario ? usuario.telefono : '',
+        correo: usuario ? usuario.correo : '',
+        imagen: usuario ? usuario.imagen : '',
+        nuevaPassword: '',
+        confirmarPassword: '',
+        password: '',
+        error: '',
+        credencialesEditables: false,
+        mostrarVerificacion: false,
     }
-    reader.readAsDataURL(file)
-}
+},
 
-const eliminarImagen = () => {
-    imagen.value = ''
-}
 
-const guardarCambios = async () => {
-    if (nuevaPassword.value !== confirmarPassword.value) {
+  methods: {
+    ...mapActions(useUserStore, ["iniciarSesion"]),
+    handleImage(e) {
+      const file = e.target.files[0]
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = (ev) => {
+        this.imagen = ev.target.result
+      }
+      reader.readAsDataURL(file)
+    },
+
+    eliminarImagen() {
+      this.imagen = ''
+    },
+
+    guardarCambios() {
+      // Validaciones básicas
+      if (!this.nombre || !this.apellidos || !this.edad || !this.telefono || !this.correo) {
+        alert('Por favor, completa todos los campos obligatorios.')
+        return
+      }
+
+      // Validación de la nueva contraseña
+      if (this.nuevaPassword && this.nuevaPassword !== this.confirmarPassword) {
         alert('Las contraseñas no coinciden. Por favor, verifica e inténtalo de nuevo.')
         return
-    }
+      }
 
-    try {
+      // Validación de contraseña mínima (si se incluye una nueva contraseña)
+      if (this.nuevaPassword && this.nuevaPassword.length < 6) {
+        alert('La nueva contraseña debe tener al menos 6 caracteres.')
+        return
+      }
+
+      try {
+        // Datos actualizados
         const datosActualizados = {
-            id: store.usuarioAutenticado.id,
-            nombre: nombre.value,
-            apellidos: apellidos.value,
-            correo: correo.value,
-            edad: edad.value,
-            telefono: telefono.value,
-            imagen: imagen.value,
-            password: nuevaPassword.value !== '' ? nuevaPassword.value : store.usuarioAutenticado.password,
+          id: this.usuario.id,
+          nombre: this.nombre,
+          apellidos: this.apellidos,
+          correo: this.correo,
+          edad: this.edad,
+          telefono: this.telefono,
+          password: this.nuevaPassword !== '' ? this.nuevaPassword : this.usuario.password, // Si no hay nueva contraseña, se mantiene la actual
+          imagen: this.imagen, // Foto de perfil
         }
-        await store.editarUsuario(datosActualizados.id, datosActualizados)
-        Object.assign(store.usuarioAutenticado, datosActualizados)
-        credencialesEditables.value = false
-        nuevaPassword.value = ''
-        confirmarPassword.value = '' // Limpia el campo de confirmación
+
+        const userStore = useUserStore();
+
+        // Llamada a la acción de Pinia para editar el usuario
+        userStore.editarUsuario(datosActualizados.id, datosActualizados);
+
+        // Actualizar la información del usuario en el store
+        Object.assign(this.usuario, datosActualizados)
+
+        // Limpiar los campos de contraseña
+        this.nuevaPassword = ''
+        this.confirmarPassword = ''
+
+        // Cerrar la edición de credenciales
+        this.credencialesEditables = false
+
+        // Notificación de éxito
         alert('Cambios guardados exitosamente.')
-    } catch (e) {
-        alert('Error al guardar los cambios.')
-    }
-}
+      } catch (e) {
+        // Manejo de errores
+        console.error('Error al guardar los cambios:', e)
+        alert('Error al guardar los cambios. Por favor, intenta nuevamente.')
+      }
+    },
 
-const verificarCredenciales = () => {
-    if (password.value === store.usuarioAutenticado.password) {
-        credencialesEditables.value = true
-        mostrarVerificacion.value = false
-        password.value = ''
-    } else {
+    verificarCredenciales() {
+      if (this.password === this.usuario.password) {
+        this.credencialesEditables = true
+        this.mostrarVerificacion = false
+        this.password = ''
+      } else {
         alert('Contraseña incorrecta.')
-    }
-}
+      }
+    },
 
-const cerrarVerificacion = () => {
-    mostrarVerificacion.value = false
-    password.value = ''
+    cerrarVerificacion() {
+      this.mostrarVerificacion = false
+      this.password = ''
+    },
+  },
 }
 </script>
+
 
 <style scoped>
 /* Fondo general */
