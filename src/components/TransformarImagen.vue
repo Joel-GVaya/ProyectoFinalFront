@@ -72,7 +72,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(useUserStore, ["generarLineArt"]),
+    ...mapActions(useUserStore, ["transformarImagen"]),
 
     seleccionarEstilo(id) {
       this.estiloSeleccionado = id;
@@ -105,18 +105,19 @@ export default {
         return;
       }
       if (!this.archivoSeleccionado) {
-        alert("Por favor selecciona o arrastra una imagen antes de convertirla.");
+        avisos.mostrarAviso({ mensaje: 'Por favor selecciona o arrastra una imagen antes de convertirla.', tipo: 'info' })
         return;
       }
 
       this.cargando = true; // ✅ Activar spinner
 
       try {
-        const respuesta = await this.generarLineArt(this.archivoSeleccionado);
-        this.$router.push({ name: 'MostrarImagen', params: { id: respuesta.nombreArchivo } });
+        const respuesta = await this.transformarImagen(this.archivoSeleccionado, this.estiloSeleccionado);
+        if(respuesta){
+          this.$router.push({ name: 'MostrarImagen', params: { id: respuesta.nombreArchivo } });
+        }
       } catch (error) {
         console.error("Error al convertir la imagen:", error);
-        alert(`Error al convertir la imagen: ${error.message}`);
       } finally {
         this.cargando = false; // ✅ Desactivar spinner
       }

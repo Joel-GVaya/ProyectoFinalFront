@@ -113,7 +113,7 @@ export default {
             this.imagen = ''
         },
 
-        guardarCambios() {
+        async guardarCambios() {
             const avisos = useAvisosStore()
 
             if (!this.nombre || !this.apellidos || !this.edad || !this.telefono || !this.correo) {
@@ -144,7 +144,7 @@ export default {
                 }
 
                 const userStore = useUserStore()
-                userStore.editarUsuario(datosActualizados.id, datosActualizados)
+                await userStore.editarUsuario(datosActualizados.id, datosActualizados)
 
                 avisos.mostrarAviso({ mensaje: 'Datos actualizados correctamente.', tipo: 'info' })
 
@@ -153,7 +153,7 @@ export default {
                 this.confirmarPassword = ''
                 this.credencialesEditables = false
 
-                window.location.reload();
+                setTimeout(() => window.location.reload(), 500)
             } catch (e) {
                 avisos.mostrarAviso({ mensaje: 'Error al guardar los cambios.', tipo: 'error' })
             }

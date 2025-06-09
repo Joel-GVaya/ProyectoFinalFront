@@ -21,7 +21,9 @@ function mostrarAviso(mensaje) {
   <div id="app">
     <NavBar />
     <Aviso />
-    <router-view @avisar="mostrarAviso" />
+    <main class="app-content">
+      <router-view @avisar="mostrarAviso" />
+    </main>
   </div>
 </template>
 
@@ -34,5 +36,10 @@ function mostrarAviso(mensaje) {
   padding: 0;
   width: 100%;
   height: 100%;
+}
+
+/* El contenido se separa del header y navbar fijo */
+.app-content {
+  padding-top: 130px; /* Ajusta este valor al total de la altura fija */
 }
 </style>

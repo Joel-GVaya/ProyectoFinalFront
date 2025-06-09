@@ -106,7 +106,6 @@ export default {
 }
 </script>
 
-
 <style scoped>
 /* General styles */
 html,
@@ -118,13 +117,16 @@ body {
   height: 100%;
 }
 
+/* HEADER FIJO */
 .app-header {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 70px;
   background-color: #2c3e50;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  z-index: 1;
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -136,20 +138,16 @@ body {
   top: 50%;
   transform: translate(-50%, -50%);
   height: 50px;
-  z-index: 2;
+  z-index: 1001;
 }
 
+/* USER MENU FIJO */
 .user-menu {
-  position: absolute;
-  /* o absolute */
-  top: 2rem;
+  position: fixed;
+  top: 1rem;
   right: 2rem;
-  z-index: 4;
-  /* muy alto para que quede delante de todo */
+  z-index: 1100;
 }
-
-
-
 
 .user-icon {
   width: 60px;
@@ -171,7 +169,6 @@ body {
   text-align: center;
   transition: background-color 0.3s ease;
   width: 120px;
-  /* Ancho fijo para alineación */
 }
 
 .auth-button:hover {
@@ -187,7 +184,7 @@ body {
   border: 1px solid #ccc;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  z-index: 4;
+  z-index: 1101;
   width: 150px;
   display: block;
 }
@@ -202,59 +199,43 @@ body {
   padding: 0.5rem 1rem;
   cursor: pointer;
   text-align: left;
+  display: flex;
+  align-items: center;
 }
 
 .dropdown-menu li:hover {
   background-color: #f4f4f4;
 }
 
-/* Estilo para los enlaces del menú desplegable */
 .dropdown-menu a {
   color: inherit;
-  /* Hereda el color del contenedor */
   text-decoration: none;
-  /* Elimina el subrayado */
   font-weight: normal;
-  /* Opcional: ajusta el peso de la fuente */
+  display: flex;
+  align-items: center;
 }
 
-/* Opcional: Estilo al pasar el ratón por encima */
 .dropdown-menu a:hover {
   color: #68af4c;
-  /* Cambia el color al pasar el ratón */
   text-decoration: none;
-  /* Asegúrate de que no aparezca subrayado */
-}
-
-/* Asegúrate de que los iconos y los textos estén alineados verticalmente */
-.dropdown-menu li a{
-  cursor: pointer;
-  text-align: left;
-  display: flex;
-  align-items: center; /* Alinea verticalmente el contenido dentro del li */
-}
-
-.dropdown-menu li{
-  cursor: pointer;
-  text-align: left;
-  display: flex;
-  align-items: center; /* Alinea verticalmente el contenido dentro del li */
 }
 
 .dropdown-menu li a .material-icons {
-  margin-right: 5px; /* Añade un espacio entre el icono y el texto */
-  font-size: 1.3rem;  /* Puedes ajustar el tamaño del icono si lo necesitas */
+  margin-right: 5px;
+  font-size: 1.3rem;
 }
 
-
 .navbar {
-  background-color: #2c3e50;
-  padding: 1rem 0 1rem 0;
+  position: fixed;
+  top: 70px; /* justo debajo del header */
+  left: 0;
   width: 100%;
+  background-color: #2c3e50;
+  padding: 1rem 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 999;
   display: flex;
   justify-content: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  z-index: 1;
 }
 
 .navbar ul {
@@ -292,5 +273,11 @@ body {
 
 .cerrar-sesion:hover {
   color: #e74c3c;
+}
+
+/* IMPORTANTE: evita que el contenido quede tapado por header + navbar */
+/* Ajusta el padding según la altura combinada de header + navbar */
+main, .page-content, .contenido {
+  padding-top: 130px; /* 70px header + 60px navbar aprox */
 }
 </style>
