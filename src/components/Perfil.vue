@@ -76,12 +76,12 @@ export default {
         const usuario = JSON.parse(localStorage.getItem("usuario")) || null
         return {
             usuario,
-            nombre: usuario?.nombre || '',
-            apellidos: usuario?.apellidos || '',
-            edad: usuario?.edad || null,
-            telefono: usuario?.telefono || '',
-            correo: usuario?.correo || '',
-            imagen: usuario?.imagen || '',
+            nombre: usuario?.Nombre || '',
+            apellidos: usuario?.Apellidos || '',
+            edad: usuario?.Edad || null,
+            telefono: usuario?.Telefono || '',
+            correo: usuario?.Correo || '',
+            imagen: usuario?.Imagen || '',
             nuevaPassword: '',
             confirmarPassword: '',
             password: '',
@@ -133,18 +133,18 @@ export default {
 
             try {
                 const datosActualizados = {
-                    id: this.usuario.id,
                     nombre: this.nombre,
                     apellidos: this.apellidos,
                     correo: this.correo,
                     edad: this.edad,
                     telefono: this.telefono,
                     password: this.nuevaPassword !== '' ? this.nuevaPassword : this.usuario.password,
+                    nivelAcceso: this.usuario.NivelAcceso,
                     imagen: this.imagen,
                 }
 
                 const userStore = useUserStore()
-                await userStore.editarUsuario(datosActualizados.id, datosActualizados)
+                await userStore.actualizarUsuario(datosActualizados)
 
                 avisos.mostrarAviso({ mensaje: 'Datos actualizados correctamente.', tipo: 'info' })
 

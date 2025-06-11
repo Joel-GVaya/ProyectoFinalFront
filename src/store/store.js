@@ -6,7 +6,7 @@ const API_URL = "https://localhost:44377/";
 
 export const useUserStore = defineStore("user", {
     state: () => ({
-        usuarios: [],
+        usuario: null,
         imagenesConvertidas: [],
         estilos: [],
         nivelesAcceso: [],
@@ -21,7 +21,12 @@ export const useUserStore = defineStore("user", {
         async populateEstilos() {
             try {
                 const response = await axios.get(
-                    "http://localhost:3000/estilosDisponibles"
+                    "https://localhost:44328/api/estilos",
+                    {
+                        headers: {
+                            Authorization: `Bearer ${JSON.parse(localStorage.getItem("usuario"))?.Token}`
+                        }
+                    }
                 );
                 this.estilos = response.data;
             } catch (error) {
@@ -189,13 +194,24 @@ export const useUserStore = defineStore("user", {
             }
         },
 
-        async getAPIImagenGeneradaById(id) {
+        async getImagenGeneradaByID(id) {
             if (!id) {
                 console.error("No se ha proporcionado un ID válido.");
                 throw new Error("No se ha proporcionado un ID válido.");
             }
+
             try {
-                const response = await axios.get(API_URL + "api/Dibujos/" + id);
+                const token = JSON.parse(localStorage.getItem("usuario"))?.Token;
+                if (!token) {
+                    throw new Error("Token no disponible. El usuario no está autenticado.");
+                }
+
+                const response = await axios.get(`https://localhost:44328/api/imagenes/usuario/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
                 return response.data;
             } catch (error) {
                 let errorMessage = "Error desconocido al obtener la imagen generada.";
@@ -203,7 +219,9 @@ export const useUserStore = defineStore("user", {
                     errorMessage = `Error del servidor (${error.response.status}): `;
                     if (typeof error.response.data === "string" && error.response.data) {
                         errorMessage += error.response.data;
-                    } else if (error.response.data && error.response.data.Message) {
+                    } else if (error.response.data?.message) {
+                        errorMessage += error.response.data.message;
+                    } else if (error.response.data?.Message) {
                         errorMessage += error.response.data.Message;
                     } else {
                         errorMessage += error.message;
@@ -218,34 +236,6 @@ export const useUserStore = defineStore("user", {
             }
         },
 
-        async getImagenGeneradaByID(id) {
-            if (!id) {
-                console.error("No se ha proporcionado un ID válido.");
-                throw new Error("No se ha proporcionado un ID válido.");
-            }
-            try {
-                const response = await axios.get("http://localhost:3000/imagenes?id=" + id);
-                return response.data;
-            } catch (error) {
-                let errorMessage = "Error desconocido al obtener la imagen generada.";
-                if (error.response) {
-                    errorMessage = `Error del servidor (${error.response.status}): `;
-                    if (typeof error.response.data === "string" && error.response.data) {
-                        errorMessage += error.response.data;
-                    } else if (error.response.data && error.response.data.Message) {
-                        errorMessage += error.response.data.Message;
-                    } else {
-                        errorMessage += error.message;
-                    }
-                } else if (error.request) {
-                    errorMessage =
-                        "No se pudo conectar con el servidor. Verifica la red o CORS.";
-                } else {
-                    errorMessage = `Error de configuración: ${error.message}`;
-                }
-                throw new Error(errorMessage);
-            }
-        },
 
         async getImagenesByUser() {
             try {
@@ -326,44 +316,57 @@ export const useUserStore = defineStore("user", {
         async eliminarImagen(id) {
             if (!id) throw new Error("ID de imagen inválido.");
 
-            const avisos = useAvisosStore(); // ✅ Instancia local del store de avisos
+            const avisos = useAvisosStore(); // ✅ Store de avisos
+            const token = JSON.parse(localStorage.getItem("usuario"))?.Token;
+
+            if (!token) {
+                avisos.mostrarAviso({
+                    mensaje: "No se pudo autenticar al usuario.",
+                    tipo: "error"
+                });
+                throw new Error("Token no disponible. El usuario no está autenticado.");
+            }
 
             try {
-                await axios.delete(`http://localhost:3000/imagenes/${id}`);
+                const response = await axios.delete(`https://localhost:44328/api/imagenes/usuario/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
                 avisos.mostrarAviso({
-                    mensaje: "Imagen eliminada exitosamente",
+                    mensaje: response.data || "Imagen eliminada exitosamente",
                     tipo: "success"
                 });
             } catch (error) {
                 console.error("Error al eliminar la imagen:", error);
+
+                let mensajeError = "No se pudo eliminar la imagen.";
+                if (error.response?.data) {
+                    mensajeError = typeof error.response.data === "string"
+                        ? error.response.data
+                        : error.response.data.message || mensajeError;
+                }
+
                 avisos.mostrarAviso({
-                    mensaje: "No se pudo eliminar la imagen",
+                    mensaje: mensajeError,
                     tipo: "error"
                 });
+
                 throw error;
-            }
-        },
-
-
-        async fetchUsuarios() {
-            try {
-                const response = await axios.get("http://localhost:3000/usuarios");
-                this.usuarios = response.data;
-            } catch (error) {
-                console.error("Error al obtener los usuarios:", error);
             }
         },
 
         async crearUsuario(nuevoUsuario) {
             try {
                 const response = await axios.post(
-                    "http://localhost:3000/usuarios",
+                    "https://localhost:44328/api/usuarios/registrar",
                     nuevoUsuario
                 );
-                this.usuarios.push(response.data);
-                this.setUsuario(response.data);
+
+                console.log("Usuario creado:", response.data.mensaje);
             } catch (error) {
-                console.error("Error al crear el usuario:", error);
+                console.error("Error al crear el usuario:", error.response?.data?.mensaje || error.message);
             }
         },
 
@@ -380,34 +383,54 @@ export const useUserStore = defineStore("user", {
             }
         },
 
-        async eliminarUsuario(id) {
-            const avisos = useAvisosStore(); // ✅ Instancia local del store de avisos
+        async actualizarUsuario(usuarioActualizado) {
             try {
-                await axios.delete(`http://localhost:3000/usuarios/${id}`);
-                this.usuarios = this.usuarios.filter((usuario) => usuario.id !== id);
-                avisos.mostrarAviso({
-                    mensaje: "Usuario eliminado correctamente",
-                    tipo: "success"
-                });
+                const response = await axios.put(
+                    "https://localhost:44328/api/usuarios",
+                    usuarioActualizado,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${JSON.parse(localStorage.getItem("usuario"))?.Token}`
+                        }
+                    }
+                );
+                this.actualizarUsuarioLocalStorage(usuarioActualizado);
+                return response.data; // o cualquier cosa que necesites devolver
             } catch (error) {
-                console.error("Error al eliminar el usuario:", error);
+                if (error.response && error.response.status === 401) {
+                    console.error("No autorizado");
+                } else {
+                    console.error("Error al actualizar usuario:", error);
+                }
+                return null;
             }
         },
 
         async iniciarSesion(correo, password) {
             try {
-                const response = await axios.get(
-                    "http://localhost:3000/usuarios?correo=" + correo
+                const response = await axios.post(
+                    "https://localhost:44328/api/usuarios/login",
+                    {
+                        correo: correo,
+                        password: password
+                    }
                 );
-                const usuario = response.data.find((u) => u.password === password);
 
-                if (usuario) {
-                    this.setUsuario(usuario);
+                // La API responde con { Mensaje, Token, Usuario }
+                const { Token, Usuario } = response.data;
+
+                if (Token && Usuario) {
+                    // Guardamos el usuario junto al token en localStorage
+                    this.setUsuario({ ...Usuario, Token });
                     return true;
                 } else {
                     return false;
                 }
             } catch (error) {
+                if (error.response && error.response.status === 401) {
+                    // Login incorrecto
+                    return false;
+                }
                 console.error("Error al iniciar sesión:", error);
                 return false;
             }
@@ -421,6 +444,7 @@ export const useUserStore = defineStore("user", {
                 localStorage.removeItem("usuario");
             }
         },
+
 
         cerrarSesion() {
             this.setUsuario(null);
@@ -494,6 +518,34 @@ export const useUserStore = defineStore("user", {
                 return 0;
             }
         },
+
+        actualizarUsuarioLocalStorage(datosNuevos) {
+            const usuarioGuardado = JSON.parse(localStorage.getItem("usuario")) || {}
+
+            // Mapeamos claves de datosNuevos a formato del localStorage
+            const datosConvertidos = {
+                Nombre: datosNuevos.nombre,
+                Apellidos: datosNuevos.apellidos,
+                Correo: datosNuevos.correo,
+                Edad: datosNuevos.edad,
+                Telefono: datosNuevos.telefono,
+                Imagen: datosNuevos.imagen,
+                NivelAcceso: datosNuevos.nivelAcceso ?? usuarioGuardado.NivelAcceso,
+                Id: usuarioGuardado.Id, // mantener
+                Token: usuarioGuardado.Token // mantener
+            }
+
+            const usuarioActualizado = {
+                ...usuarioGuardado,
+                ...datosConvertidos
+            }
+            this.usuario = usuarioActualizado
+            // Actualizamos el localStorage
+            localStorage.setItem("usuario", JSON.stringify(usuarioActualizado))
+            this.usuario = usuarioActualizado
+        }
+
+
 
     },
 });

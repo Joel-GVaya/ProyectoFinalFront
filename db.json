@@ -43,6 +43,26 @@
       "imagen": "",
       "password": "1234567",
       "nivelAcceso": "4"
+    },
+    {
+      "id": "3624",
+      "nombre": "asd",
+      "apellidos": "das",
+      "correo": "asdasd@example.com",
+      "edad": 45,
+      "telefono": "123456789",
+      "password": "987654321",
+      "imagen": ""
+    },
+    {
+      "id": "eb82",
+      "nombre": "Arturo",
+      "apellidos": "Segura",
+      "correo": "jsegura@gmail.com",
+      "edad": 34,
+      "telefono": "123456789",
+      "password": "123456",
+      "imagen": ""
     }
   ],
   "estilosDisponibles": [

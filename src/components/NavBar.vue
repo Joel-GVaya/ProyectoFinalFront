@@ -1,56 +1,59 @@
 <template>
-  <div class="user-menu" ref="menuRef">
-    <template v-if="usuario">
-      <img
-        :src="usuario.imagen || defaultUserImage"
-        alt="perfil"
-        class="user-icon"
-        @click.stop="toggleMenu"
-      />
-      <div class="dropdown-menu" v-if="menuAbierto">
-        <ul>
-          <li class="opcion-usuario">
-            <router-link to="/perfil" @click.native="closeMenu">
-              <a><span class="material-icons">account_circle</span> Perfil</a>
-            </router-link>
-          </li>
-          <li class="opcion-usuario">
-            <router-link to="/historial" @click.native="closeMenu">
-              <span class="material-icons">schedule</span> Historial
-            </router-link>
-          </li>
-          <li class="opcion-usuario">
-            <router-link to="/planes" @click.native="closeMenu">
-              <span class="material-icons">bolt</span> Planes
-            </router-link>
-          </li>
-          <li @click="logout" class="opcion-usuario cerrar-sesion">
-            <span class="material-icons">logout</span> Log Out
-          </li>
-        </ul>
-      </div>
-    </template>
+  <div class="app-header-wrapper">
+    <div class="user-menu" ref="menuRef">
+      <template v-if="usuario">
+        <img
+          :src="usuario.Imagen || defaultUserImage"
+          alt="perfil"
+          class="user-icon"
+          @click.stop="toggleMenu"
+        />
+        <div class="dropdown-menu" v-if="menuAbierto">
+          <ul>
+            <li class="opcion-usuario">
+              <router-link to="/perfil" @click.native="closeMenu">
+                <a><span class="material-icons">account_circle</span> Perfil</a>
+              </router-link>
+            </li>
+            <li class="opcion-usuario">
+              <router-link to="/historial" @click.native="closeMenu">
+                <span class="material-icons">schedule</span> Historial
+              </router-link>
+            </li>
+            <li class="opcion-usuario">
+              <router-link to="/planes" @click.native="closeMenu">
+                <span class="material-icons">bolt</span> Planes
+              </router-link>
+            </li>
+            <li @click="logout" class="opcion-usuario cerrar-sesion">
+              <span class="material-icons">logout</span> Log Out
+            </li>
+          </ul>
+        </div>
+      </template>
 
-    <template v-else>
-      <router-link to="/iniciar-sesion" class="auth-button">Log In</router-link>
-      <router-link to="/registro" class="auth-button">Register</router-link>
-    </template>
+      <template v-else>
+        <router-link to="/iniciar-sesion" class="auth-button">Log In</router-link>
+        <router-link to="/registro" class="auth-button">Register</router-link>
+      </template>
+    </div>
+
+    <header class="app-header">
+      <img src="@/assets/Pixalchemy.png" alt="Logo de la App" class="app-logo" />
+    </header>
+
+    <nav class="navbar">
+      <ul>
+        <li><router-link to="/">Home</router-link></li>
+        <li v-if="usuario"><router-link to="/generar-imagen">Generar Imagen</router-link></li>
+        <li v-if="usuario"><router-link to="/transformar-imagen">Transformar Imagen</router-link></li>
+        <li><router-link to="/publicaciones">Arte Generado</router-link></li>
+        <li><router-link to="/about-us">About Us</router-link></li>
+      </ul>
+    </nav>
   </div>
-
-  <header class="app-header">
-    <img src="@/assets/Pixalchemy.png" alt="Logo de la App" class="app-logo" />
-  </header>
-
-  <nav class="navbar">
-    <ul>
-      <li><router-link to="/">Home</router-link></li>
-      <li v-if="usuario"><router-link to="/generar-imagen">Generar Imagen</router-link></li>
-      <li v-if="usuario"><router-link to="/transformar-imagen">Transformar Imagen</router-link></li>
-      <li><router-link to="/publicaciones">Arte Generado</router-link></li>
-      <li><router-link to="/about-us">About Us</router-link></li>
-    </ul>
-  </nav>
 </template>
+
 
 <script>
 import { useUserStore } from '@/store/store.js'
