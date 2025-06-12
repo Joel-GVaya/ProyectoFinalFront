@@ -114,7 +114,7 @@ export default {
       try {
         const respuesta = await this.transformarImagen(this.archivoSeleccionado, this.estiloSeleccionado);
         if(respuesta){
-          this.$router.push({ name: 'MostrarImagen', params: { id: respuesta.nombreArchivo } });
+          this.$router.push({ name: 'MostrarImagen', params: { id: respuesta } });
         }
       } catch (error) {
         console.error("Error al convertir la imagen:", error);

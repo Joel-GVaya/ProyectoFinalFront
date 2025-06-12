@@ -44,8 +44,8 @@ export default {
 
       console.log("Respuesta de getImagenGeneradaByID:", respuesta);
 
-      if (Array.isArray(respuesta) && respuesta.length > 0 && respuesta[0].imagen_base64) {
-        this.imagen = respuesta[0].imagen_base64;
+      if (respuesta.ImagenBase64) {
+        this.imagen = respuesta.ImagenBase64;
       } else {
         console.warn("No se encontró ninguna imagen válida para el ID proporcionado.");
       }

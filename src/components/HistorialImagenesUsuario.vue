@@ -47,25 +47,28 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="imagen in imagenesPaginadas" :key="imagen.id">
+                <tr v-for="imagen in imagenesPaginadas" :key="imagen.Id">
                     <td>
-                        <img :src="`data:image/png;base64,${imagen.imagen_base64}`" alt="Imagen generada"
+                        <img :src="`data:image/png;base64,${imagen.ImagenBase64}`" alt="Imagen generada"
                             class="preview" />
                     </td>
-                    <td>{{ formatearFecha(imagen.fecha) }}</td>
-                    <td>{{ getNombreEstilo(imagen.estilo) }}</td>
+                    <td>{{ formatearFecha(imagen.Fecha) }}</td>
+                    <td>{{ getNombreEstilo(imagen.Estilo) }}</td>
                     <td>
                         <div class="opciones-botonera">
                             <button @click="togglePublicacion(imagen)"
-                                :title="imagen.publicada ? 'Despublicar imagen' : 'Publicar imagen'"
-                                :class="{ 'btn-publicar': !imagen.publicada, 'btn-despublicar': imagen.publicada }">
-                                {{ imagen.publicada ? "📤" : "📥" }}
+                                :title="imagen.Publicada ? 'Despublicar imagen' : 'Publicar imagen'"
+                                :class="{ 'btn-publicar': !imagen.Publicada, 'btn-despublicar': imagen.Publicada }">
+                                {{ imagen.Publicada ? "📤" : "📥" }}
                             </button>
-                            <button @click="eliminar(imagen.id)" title="Eliminar imagen"
-                                class="btn-eliminar">🗑️</button>
-                            <button @click="descargar(imagen.imagen_base64)" title="Descargar imagen"
-                                class="btn-descargar">⬇️</button>
-                            <button @click="ver(imagen.id)" title="Ver imagen" class="btn-ver">🔍</button>
+                            <button @click="eliminar(imagen.Id)" title="Eliminar imagen" class="btn-eliminar">
+                                🗑️
+                            </button>
+                            <button @click="descargar(imagen.ImagenBase64)" title="Descargar imagen"
+                                class="btn-descargar">
+                                ⬇️
+                            </button>
+                            <button @click="ver(imagen.Id)" title="Ver imagen" class="btn-ver">🔍</button>
                         </div>
                     </td>
                 </tr>
@@ -106,11 +109,8 @@ export default {
             const imagenesData = await this.userStore.getImagenesByUser();
             this.imagenes = imagenesData;
 
-            // Estilos usados en las imágenes
-            const estilosUsados = new Set(this.imagenes.map((img) => img.estilo));
-            this.estilosDisponibles = this.estilos.filter((estilo) =>
-                estilosUsados.has(estilo.id)
-            );
+            const estilosUsados = new Set(imagenesData.map((img) => img.Estilo));
+            this.estilosDisponibles = this.estilos.filter((estilo) => estilosUsados.has(estilo.id));
         } catch (error) {
             console.error("Error al obtener imágenes:", error);
         }
@@ -121,11 +121,11 @@ export default {
 
         imagenesFiltradas() {
             return this.imagenes.filter((imagen) => {
-                const fechaImagen = new Date(imagen.fecha);
+                const fechaImagen = new Date(imagen.Fecha);
                 const desde = this.filtroFechaDesde ? new Date(this.filtroFechaDesde) : null;
                 const hasta = this.filtroFechaHasta ? new Date(this.filtroFechaHasta) : null;
 
-                const pasaEstilo = this.filtroEstilo ? imagen.estilo === this.filtroEstilo : true;
+                const pasaEstilo = this.filtroEstilo ? imagen.Estilo == this.filtroEstilo : true;
                 const pasaDesde = desde ? fechaImagen >= desde : true;
                 const pasaHasta = hasta ? fechaImagen <= hasta : true;
 
@@ -139,28 +139,22 @@ export default {
 
         imagenesPaginadas() {
             const start = (this.paginaActual - 1) * this.itemsPorPagina;
-            const end = start + this.itemsPorPagina;
-            return this.imagenesFiltradas.slice(start, end);
+            return this.imagenesFiltradas.slice(start, start + this.itemsPorPagina);
         },
     },
 
     watch: {
         imagenes: {
             handler(nuevasImagenes) {
-                const estilosUsados = new Set(nuevasImagenes.map((img) => img.estilo));
-                this.estilosDisponibles = this.estilos.filter((estilo) =>
-                    estilosUsados.has(estilo.id)
-                );
-
-                // Si el filtroEstilo actual ya no existe, resetea el filtro
+                const estilosUsados = new Set(nuevasImagenes.map((img) => img.Estilo));
+                this.estilosDisponibles = this.estilos.filter((estilo) => estilosUsados.has(estilo.id));
                 if (this.filtroEstilo && !estilosUsados.has(this.filtroEstilo)) {
                     this.filtroEstilo = "";
                 }
             },
             immediate: true,
         },
-
-        imagenesFiltradas(nuevaLista) {
+        imagenesFiltradas() {
             if (this.paginaActual > this.totalPaginas) {
                 this.paginaActual = this.totalPaginas || 1;
             }
@@ -180,66 +174,37 @@ export default {
             this.userStore
                 .eliminarImagen(id)
                 .then(() => {
-                    // Eliminar la imagen localmente para que desaparezca sin recargar
-                    this.imagenes = this.imagenes.filter((img) => img.id !== id);
+                    this.imagenes = this.imagenes.filter((img) => img.Id !== id);
                 })
                 .catch((error) => {
                     console.error("Error al eliminar la imagen:", error);
                 });
         },
-
         async togglePublicacion(imagen) {
             try {
-                if (imagen.publicada) {
-                    await this.despublicar(imagen.id);
-                    imagen.publicada = false; // Actualizar estado localmente
-                } else {
-                    await this.publicar(imagen.id);
-                    imagen.publicada = true; // Actualizar estado localmente
+                const exito = await this.userStore.publicarImagen(imagen.Id);
+                if (exito === true) {
+                    imagen.Publicada = !imagen.Publicada;
+                    this.imagenes = [...this.imagenes];
                 }
             } catch (error) {
                 console.error("Error al cambiar el estado de publicación:", error);
             }
         },
-
-        publicar(id) {
-            return this.userStore
-                .publicarImagen(id)
-                .then(() => {
-                    // Opcional: mostrar aviso, si usas un sistema de avisos
-                })
-                .catch((error) => {
-                    console.error("Error al publicar la imagen:", error);
-                });
-        },
-
-        despublicar(id) {
-            return this.userStore
-                .despublicarImagen(id)
-                .then(() => {
-                    // Opcional: mostrar aviso
-                })
-                .catch((error) => {
-                    console.error("Error al despublicar la imagen:", error);
-                });
-        },
-
         descargar(base64) {
-            if (!base64) {
-                console.error("No hay imagen para descargar.");
-                return;
-            }
+            if (!base64) return;
             const enlace = document.createElement("a");
             enlace.href = `data:image/png;base64,${base64}`;
-            enlace.download = `imagen.png`;
+            enlace.download = "imagen.png";
             document.body.appendChild(enlace);
             enlace.click();
             document.body.removeChild(enlace);
         },
         ver(id) {
-            this.$router.push({ name: "MostrarImagen", params: { id: id } });
+            this.$router.push({ name: "MostrarImagen", params: { id } });
         },
     },
+
 };
 </script>
 

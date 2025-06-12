@@ -47,18 +47,18 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="imagen in imagenesPaginadas" :key="imagen.id">
+                <tr v-for="imagen in imagenesPaginadas" :key="imagen.Id">
                     <td>
-                        <img :src="`data:image/png;base64,${imagen.imagen_base64}`" alt="Imagen publicada"
+                        <img :src="`data:image/png;base64,${imagen.ImagenBase64}`" alt="Imagen publicada"
                             class="preview" />
                     </td>
-                    <td>{{ formatearFecha(imagen.fecha) }}</td>
-                    <td>{{ getNombreEstilo(imagen.estilo) }}</td>
+                    <td>{{ formatearFecha(imagen.Fecha) }}</td>
+                    <td>{{ getNombreEstilo(imagen.Estilo) }}</td>
                     <td>
                         <div class="opciones-botonera">
-                            <button @click="descargar(imagen.imagen_base64)" title="Descargar imagen"
+                            <button @click="descargar(imagen.ImagenBase64)" title="Descargar imagen"
                                 class="btn-descargar">⬇️</button>
-                            <button @click="ver(imagen.id)" title="Ver imagen" class="btn-ver">🔍</button>
+                            <button @click="ver(imagen.Id)" title="Ver imagen" class="btn-ver">🔍</button>
                         </div>
                     </td>
                 </tr>
@@ -77,6 +77,7 @@
         </div>
     </div>
 </template>
+
 
 <script>
 import { useUserStore } from "@/store/store";
@@ -101,7 +102,7 @@ export default {
             const publicaciones = await this.userStore.getPublicaciones();
             this.imagenes = publicaciones;
 
-            const estilosUsados = new Set(this.imagenes.map((img) => img.estilo));
+            const estilosUsados = new Set(this.imagenes.map((img) => img.Estilo));
             this.estilosDisponibles = this.userStore.estilos.filter((estilo) =>
                 estilosUsados.has(estilo.id)
             );
@@ -112,11 +113,11 @@ export default {
     computed: {
         imagenesFiltradas() {
             return this.imagenes.filter((imagen) => {
-                const fechaImagen = new Date(imagen.fecha);
+                const fechaImagen = new Date(imagen.Fecha);
                 const desde = this.filtroFechaDesde ? new Date(this.filtroFechaDesde) : null;
                 const hasta = this.filtroFechaHasta ? new Date(this.filtroFechaHasta) : null;
 
-                const pasaEstilo = this.filtroEstilo ? imagen.estilo === this.filtroEstilo : true;
+                const pasaEstilo = this.filtroEstilo ? imagen.Estilo === this.filtroEstilo : true;
                 const pasaDesde = desde ? fechaImagen >= desde : true;
                 const pasaHasta = hasta ? fechaImagen <= hasta : true;
 
@@ -133,7 +134,7 @@ export default {
         },
     },
     watch: {
-        imagenesFiltradas(nuevaLista) {
+        imagenesFiltradas() {
             if (this.paginaActual > this.totalPaginas) {
                 this.paginaActual = this.totalPaginas || 1;
             }
@@ -163,6 +164,7 @@ export default {
     },
 };
 </script>
+
 
 <style scoped>
 .publicaciones-usuarios {

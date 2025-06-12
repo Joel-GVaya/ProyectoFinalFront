@@ -35,42 +35,30 @@ export const useUserStore = defineStore("user", {
         },
 
         async transformarImagen(imageFile, estilo) {
-            const avisos = useAvisosStore();
-            if (!(await this.comprobarSiPuedeGenerarImagen())) {
-                avisos.mostrarAviso({
-                    mensaje: "Ya has alcanzado el límite diario de imágenes permitidas.",
-                    tipo: "error"
-                });
-                return false;
-            }
-
             if (!imageFile || !(imageFile instanceof File)) {
                 console.error("No se ha proporcionado una imagen válida.");
                 throw new Error("No se ha proporcionado una imagen válida.");
             }
 
             const formData = new FormData();
-            formData.append("image", imageFile, imageFile.name);
+            formData.append("archivo", imageFile);
+            formData.append("EstiloId", estilo);
 
             try {
                 const response = await axios.post(
-                    API_URL + "api/Dibujos/subir/imagen",
-                    formData
+                    "https://localhost:44328/api/Generador1/subir/imagen",
+                    formData,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${JSON.parse(localStorage.getItem("usuario"))?.Token}`,
+                            "Content-Type": "multipart/form-data"
+                        }
+                    }
                 );
 
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                // Retornamos el IdImagenGenerada directamente
+                return response.data.IdImagenGenerada;
 
-                if (!response.data || !response.data.nombreArchivo) {
-                    console.error("Respuesta inesperada del servidor:", response.data);
-                };
-                const respuesta = await this.getAPIImagenGeneradaById(response.data.nombreArchivo);
-                if (!respuesta || !respuesta.imagenBase64) {
-                    console.error("No se pudo obtener la imagen generada.");
-                    throw new Error("No se pudo obtener la imagen generada.");
-                } else {
-                    this.guardarImagenBase64(response.data.nombreArchivo, respuesta.imagenBase64, estilo);
-                }
-                return response.data;
             } catch (error) {
                 let errorMessage = "Error desconocido al procesar la imagen.";
                 if (error.response) {
@@ -83,8 +71,7 @@ export const useUserStore = defineStore("user", {
                         errorMessage += error.message;
                     }
                 } else if (error.request) {
-                    errorMessage =
-                        "No se pudo conectar con el servidor. Verifica la red o CORS.";
+                    errorMessage = "No se pudo conectar con el servidor. Verifica la red o CORS.";
                 } else {
                     errorMessage = `Error de configuración: ${error.message}`;
                 }
@@ -92,10 +79,8 @@ export const useUserStore = defineStore("user", {
             }
         },
 
+
         async generarImagen(prompt, estilo) {
-            if (!(await this.comprobarSiPuedeGenerarImagen())) {
-                return false;
-            }
 
             try {
                 const response = await axios.post(
@@ -143,52 +128,50 @@ export const useUserStore = defineStore("user", {
                 console.error("No se ha proporcionado un ID válido.");
                 throw new Error("No se ha proporcionado un ID válido.");
             }
+            const token = JSON.parse(localStorage.getItem("usuario"))?.Token;
+            if (!token) {
+                throw new Error("Token no disponible. El usuario no está autenticado.");
+            }
 
-            const avisos = useAvisosStore(); // ✅ Instancia local del store de avisos
+            const avisos = useAvisosStore(); // Store para mostrar avisos
+            const userStore = useUserStore(); // Store para obtener token del usuario
 
             try {
-                const response = await axios.patch(
-                    `http://localhost:3000/imagenes/${id}`,
-                    { publicada: true }
+                const response = await axios.get(
+                    `https://localhost:44328/api/imagenes/publicar/${id}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
                 );
-                avisos.mostrarAviso({
-                    mensaje: "Imagen publicada exitosamente",
-                    tipo: "success"
-                });
-                return response.data;
+
+                if (response.data.success === true) {
+                    if (response.data.publicada === 1) {
+                        avisos.mostrarAviso({
+                            mensaje: "Imagen publicada exitosamente",
+                            tipo: "success",
+                        });
+                    } else {
+                        avisos.mostrarAviso({
+                            mensaje: "Publicacion eliminada exitosamente",
+                            tipo: "success",
+                        });
+                    }
+                    return true
+                } else {
+                    avisos.mostrarAviso({
+                        mensaje: "No se pudo publicar la imagen",
+                        tipo: "error",
+                    });
+                    return false;
+                }
+
             } catch (error) {
                 console.error("Error al publicar la imagen:", error);
                 avisos.mostrarAviso({
-                    mensaje: "No se pudo publicar la imagen",
-                    tipo: "error"
-                });
-                throw error;
-            }
-        },
-
-        async despublicarImagen(id) {
-            if (!id) {
-                console.error("No se ha proporcionado un ID válido.");
-                throw new Error("No se ha proporcionado un ID válido.");
-            }
-
-            const avisos = useAvisosStore(); // ✅ Instancia local del store de avisos
-
-            try {
-                const response = await axios.patch(
-                    `http://localhost:3000/imagenes/${id}`,
-                    { publicada: false }
-                );
-                avisos.mostrarAviso({
-                    mensaje: "Imagen despublicada exitosamente",
-                    tipo: "success"
-                });
-                return response.data;
-            } catch (error) {
-                console.error("Error al publicar la imagen:", error);
-                avisos.mostrarAviso({
-                    mensaje: "No se pudo despublicar la imagen",
-                    tipo: "error"
+                    mensaje: "Error al contactar con el servidor",
+                    tipo: "error",
                 });
                 throw error;
             }
@@ -238,33 +221,53 @@ export const useUserStore = defineStore("user", {
 
 
         async getImagenesByUser() {
+            const avisos = useAvisosStore(); // Opcional: para mostrar avisos si lo deseas
+
             try {
-                const response = await axios.get("http://localhost:3000/imagenes?id_usuario=" + this.usuario.id);
+                const token = JSON.parse(localStorage.getItem("usuario"))?.Token;
+                if (!token) {
+                    throw new Error("Token no disponible. El usuario no está autenticado.");
+                }
+
+                const response = await axios.get("https://localhost:44328/api/imagenes/usuario", {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
                 return response.data;
             } catch (error) {
-                let errorMessage = "Error desconocido al obtener las imagenes del usuario.";
+                let errorMessage = "Error desconocido al obtener las imágenes del usuario.";
                 if (error.response) {
                     errorMessage = `Error del servidor (${error.response.status}): `;
                     if (typeof error.response.data === "string" && error.response.data) {
                         errorMessage += error.response.data;
-                    } else if (error.response.data && error.response.data.Message) {
+                    } else if (error.response.data?.message) {
+                        errorMessage += error.response.data.message;
+                    } else if (error.response.data?.Message) {
                         errorMessage += error.response.data.Message;
                     } else {
                         errorMessage += error.message;
                     }
                 } else if (error.request) {
-                    errorMessage =
-                        "No se pudo conectar con el servidor. Verifica la red o CORS.";
+                    errorMessage = "No se pudo conectar con el servidor. Verifica la red o CORS.";
                 } else {
                     errorMessage = `Error de configuración: ${error.message}`;
                 }
+
+                // Mostrar aviso opcional
+                avisos?.mostrarAviso?.({
+                    mensaje: errorMessage,
+                    tipo: "error"
+                });
+
                 throw new Error(errorMessage);
             }
         },
 
         async getPublicaciones() {
             try {
-                const response = await axios.get("http://localhost:3000/imagenes?publicada=true");
+                const response = await axios.get("https://localhost:44328/api/imagenes/publicaciones");
                 return response.data;
             } catch (error) {
                 let errorMessage = "Error desconocido al obtener las imagenes publicadas";
@@ -448,56 +451,6 @@ export const useUserStore = defineStore("user", {
 
         cerrarSesion() {
             this.setUsuario(null);
-        },
-
-        async getNivelesAcceso() {
-            try {
-                const response = await fetch('http://localhost:3000/niveles_acceso');
-                const data = await response.json();
-                this.nivelesAcceso = data;
-            } catch (error) {
-                console.error('Error al obtener niveles de acceso:', error);
-            }
-        },
-
-        async comprobarSiPuedeGenerarImagen() {
-            const avisos = useAvisosStore(); // ✅ Instancia local del store de avisos
-            await this.getNivelesAcceso();
-            if (!this.usuario) {
-                avisos.mostrarAviso({
-                    mensaje: "No has iniciado session",
-                    tipo: "error"
-                });
-                return false;
-            }
-
-            const nivel = this.nivelesAcceso.find(
-                (n) => String(n.id) === String(this.usuario.nivelAcceso)
-            );
-
-            if (!nivel) {
-                avisos.mostrarAviso({
-                    mensaje: "Tu nivel de acceso no esta definido",
-                    tipo: "error"
-                });
-                return false;
-            }
-
-            const limite = parseInt(nivel.cantidad, 10);
-
-            if (limite >= 2000) return true; // acceso ilimitado
-
-            const generadasHoy = await this.getImagenesGeneradasHoy(this.usuario.id);
-
-            if (generadasHoy >= limite) {
-                avisos.mostrarAviso({
-                    mensaje: "Has alcanzado el límite diario de ${limite} imágenes.",
-                    tipo: "info"
-                });
-                return false;
-            }
-
-            return true;
         },
 
         async getImagenesGeneradasHoy(usuarioId) {
