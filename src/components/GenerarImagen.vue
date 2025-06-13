@@ -78,7 +78,7 @@ export default {
         if(respuesta){
           this.$router.push({
           name: "MostrarImagen",
-          params: { id: respuesta.nombreArchivo },
+          params: { id: respuesta.IdImagenGenerada },
           });
         }
         

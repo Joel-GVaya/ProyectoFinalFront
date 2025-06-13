@@ -46,7 +46,7 @@ export const useUserStore = defineStore("user", {
 
             try {
                 const response = await axios.post(
-                    "https://localhost:44328/api/Generador1/subir/imagen",
+                    "https://localhost:44328/api/generador/subir/imagen",
                     formData,
                     {
                         headers: {
@@ -81,27 +81,37 @@ export const useUserStore = defineStore("user", {
 
 
         async generarImagen(prompt, estilo) {
+            if (!prompt || !estilo) {
+                throw new Error("Faltan parámetros para generar la imagen.");
+            }
+
+            // Prepara el formData con los campos que espera el backend
+            const formData = new FormData();
+            formData.append("prompt", prompt);
+            formData.append("EstiloId", estilo);
 
             try {
+                const token = JSON.parse(localStorage.getItem("usuario"))?.Token || "";
+
                 const response = await axios.post(
-                    API_URL + "api/Dibujos/subir/texto",
-                    { promptUsuario: prompt }  // JSON directo
+                    "https://localhost:44328/api/generador/subir/texto",
+                    formData,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "multipart/form-data"
+                        }
+                    }
                 );
 
-
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                if (!response.data || !response.data.nombreArchivo) {
+                // Aquí la respuesta debería contener IdImagenGenerada según lo que diste
+                if (!response.data || !response.data.IdImagenGenerada) {
                     console.error("Respuesta inesperada del servidor:", response.data);
-                };
-                const respuesta = await this.getAPIImagenGeneradaById(response.data.nombreArchivo);
-                if (!respuesta || !respuesta.imagenBase64) {
-                    console.error("No se pudo obtener la imagen generada.");
-                    throw new Error("No se pudo obtener la imagen generada.");
-                } else {
-                    this.guardarImagenBase64(response.data.nombreArchivo, respuesta.imagenBase64, estilo);
+                    throw new Error("No se recibió IdImagenGenerada.");
                 }
+
                 return response.data;
+
             } catch (error) {
                 let errorMessage = "Error desconocido al procesar la imagen.";
                 if (error.response) {
@@ -114,14 +124,14 @@ export const useUserStore = defineStore("user", {
                         errorMessage += error.message;
                     }
                 } else if (error.request) {
-                    errorMessage =
-                        "No se pudo conectar con el servidor. Verifica la red o CORS.";
+                    errorMessage = "No se pudo conectar con el servidor. Verifica la red o CORS.";
                 } else {
                     errorMessage = `Error de configuración: ${error.message}`;
                 }
                 throw new Error(errorMessage);
             }
         },
+
 
         async publicarImagen(id) {
             if (!id) {
@@ -290,31 +300,6 @@ export const useUserStore = defineStore("user", {
             }
         },
 
-        async guardarImagenBase64(id, imagenBase64, estilo) {
-            if (!imagenBase64) throw new Error("Imagen inválida.");
-            if (!this.usuario || !this.usuario.id)
-                throw new Error("Usuario no autenticado.");
-
-            const nuevaImagen = {
-                id: id,
-                id_usuario: this.usuario.id,
-                publicada: false,
-                fecha: new Date().toISOString(),
-                estilo: estilo || "default",
-                imagen_base64: imagenBase64,
-            };
-
-            try {
-                const response = await axios.post(
-                    "http://localhost:3000/imagenes",
-                    nuevaImagen
-                );
-                return response.data;
-            } catch (error) {
-                console.error("Error al guardar la imagen:", error);
-                throw new Error("No se pudo guardar la imagen.");
-            }
-        },
 
         async eliminarImagen(id) {
             if (!id) throw new Error("ID de imagen inválido.");
