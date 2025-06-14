@@ -77,7 +77,7 @@ export default {
 .home {
   text-align: center;
   padding: 2rem;
-  background-color: #f5f5f5;
+  background-color: #284870;
 }
 
 /* Hero */
@@ -119,6 +119,7 @@ export default {
 /* Examples */
 .examples {
   margin-bottom: 3rem;
+  padding: 0 30px; /* Margen horizontal simétrico */
 }
 
 .examples h2 {
@@ -131,7 +132,9 @@ export default {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.5rem;
+  background-color: #4f8a64;
 }
+
 
 .example-card {
   background-color: white;
@@ -140,6 +143,11 @@ export default {
   padding: 1rem;
   text-align: center;
   transition: transform 0.3s ease;
+  width: 80%;
+  height: 80%;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .example-card:hover {
@@ -147,8 +155,8 @@ export default {
 }
 
 .example-image {
-  width: 175px;
-  height: 175px;
+  width: 150px;
+  height: 150px;
   object-fit: cover;
   border-radius: 8px;
   margin-bottom: 0.5rem;
@@ -156,15 +164,18 @@ export default {
 
 /* Features */
 .features {
-  padding: 2rem 0;
-  background-color: #ede7f6;
-  border-radius: 12px;
-  margin-bottom: 3rem;
+  padding: 2rem;
+  background: linear-gradient(to right, #5130ad, #843d91);
+  border-radius: 10px;
+  border: 4px solid #ffffff;
+  margin: 3rem auto; /* auto para centrar horizontalmente */
+  width: 40%;
 }
+
 
 .features h2 {
   font-size: 2rem;
-  color: #6a1b9a;
+  color: #ffffff;
   margin-bottom: 1rem;
 }
 
@@ -176,11 +187,12 @@ export default {
 
 .features-list li {
   margin: 0.5rem 0;
+  color: #ffffff;
 }
 
 /* Text to Image */
 .text-to-image {
-  background-color: #d1c4e9;
+  background-color: #355e6c;
   padding: 2rem;
   border-radius: 12px;
   margin-bottom: 2rem;
@@ -188,18 +200,19 @@ export default {
 
 .text-to-image h2 {
   font-size: 2rem;
-  color: #6a1b9a;
+  color: white;
   margin-bottom: 1rem;
 }
 
 .text-to-image p {
   font-size: 1.2rem;
   margin-bottom: 2rem;
+  color: white;
 }
 
 /* Image to Image */
 .image-to-image {
-  background-color: #d1c4e9;
+  background-color: #355e6c;
   padding: 2rem;
   border-radius: 12px;
   margin-bottom: 3rem;
@@ -207,18 +220,19 @@ export default {
 
 .image-to-image h2 {
   font-size: 2rem;
-  color: #6a1b9a;
+  color: white;
   margin-bottom: 1rem;
 }
 
 .image-to-image p {
   font-size: 1.2rem;
   margin-bottom: 2rem;
+  color: white;
 }
 
 /* Testimonios */
 .testimonios {
-  background-color: #ffffff;
+  background-color: #355e6c;
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -227,7 +241,7 @@ export default {
 
 .testimonios h2 {
   font-size: 2rem;
-  color: #6a1b9a;
+  color: white;
   margin-bottom: 1.5rem;
 }
 
@@ -252,4 +266,11 @@ export default {
 .final-cta h2 {
   margin-bottom: 1rem;
 }
+
+@media (max-width: 768px) {
+  .features {
+    width: 90%;
+  }
+}
+
 </style>

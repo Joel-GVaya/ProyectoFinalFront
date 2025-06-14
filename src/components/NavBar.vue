@@ -2,12 +2,14 @@
   <div class="app-header-wrapper">
     <div class="user-menu" ref="menuRef">
       <template v-if="usuario">
+        <div class="app-logo">
         <img
           :src="usuario.Imagen || defaultUserImage"
           alt="perfil"
           class="user-icon"
           @click.stop="toggleMenu"
         />
+        </div>
         <div class="dropdown-menu" v-if="menuAbierto">
           <ul>
             <li class="opcion-usuario">
@@ -33,8 +35,10 @@
       </template>
 
       <template v-else>
+        <div class="auth-buttons">
         <router-link to="/iniciar-sesion" class="auth-button">Log In</router-link>
         <router-link to="/registro" class="auth-button">Register</router-link>
+        </div>
       </template>
     </div>
 
@@ -126,8 +130,8 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 70px;
-  background-color: #2c3e50;
+  height: 120px;
+  background-color:#00193a;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   display: flex;
@@ -159,6 +163,8 @@ body {
   cursor: pointer;
   border: 2px solid white;
   object-fit: cover;
+  margin-top: 40px;
+  margin-right: 45px;
 }
 
 .auth-button {
@@ -223,6 +229,7 @@ body {
   text-decoration: none;
 }
 
+
 .dropdown-menu li a .material-icons {
   margin-right: 5px;
   font-size: 1.3rem;
@@ -230,10 +237,10 @@ body {
 
 .navbar {
   position: fixed;
-  top: 70px; /* justo debajo del header */
+  top: 120px; /* justo debajo del header */
   left: 0;
   width: 100%;
-  background-color: #2c3e50;
+  background-color: #00224e;
   padding: 1rem 0;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   z-index: 999;
@@ -243,10 +250,13 @@ body {
 
 .navbar ul {
   list-style: none;
-  margin: 0;
+  margin-right: 500px;
+  margin-left: 500px;
   padding: 0;
   display: flex;
-  gap: 1.5rem;
+  width: 100%;
+  justify-content: space-between;
+  margin-top: 15px
 }
 
 .navbar li {
@@ -277,6 +287,17 @@ body {
 .cerrar-sesion:hover {
   color: #e74c3c;
 }
+
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.home{
+  background-color: #284870;
+}
+
 
 /* IMPORTANTE: evita que el contenido quede tapado por header + navbar */
 /* Ajusta el padding según la altura combinada de header + navbar */
