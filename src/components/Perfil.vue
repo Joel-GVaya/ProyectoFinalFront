@@ -97,7 +97,7 @@ export default {
     },
 
     methods: {
-        ...mapActions(useUserStore, ["iniciarSesion"]),
+        ...mapActions(useUserStore, ["iniciarSesion", "verificarContrasena"]),
 
         handleImage(e) {
             const file = e.target.files[0]
@@ -159,16 +159,22 @@ export default {
             }
         },
 
-        verificarCredenciales() {
+        async verificarCredenciales() {
             const avisos = useAvisosStore()
-            if (this.password === this.usuario.password) {
-                this.credencialesEditables = true
-                this.mostrarVerificacion = false
-                this.password = ''
-            } else {
-                avisos.mostrarAviso({ mensaje: 'Contraseña incorrecta.', tipo: 'error' })
+            try {
+                const resultado = await this.verificarContrasena(this.password)
+                if (resultado.Exito) {
+                    this.credencialesEditables = true
+                    this.mostrarVerificacion = false
+                    this.password = ''
+                } else {
+                    avisos.mostrarAviso({ mensaje: 'Contraseña incorrecta.', tipo: 'error' })
+                }
+            } catch (error) {
+                avisos.mostrarAviso({ mensaje: 'Error al verificar la contraseña.', tipo: 'error' })
             }
         },
+
 
         cerrarVerificacion() {
             this.mostrarVerificacion = false

@@ -55,7 +55,13 @@ export const useUserStore = defineStore("user", {
                         }
                     }
                 );
-
+                if(response.data.exito === false) {
+                    avisos.mensajeError({
+                        mensaje: response.data.mensaje || "Error al procesar la imagen.",
+                        tipo: "error"
+                    });
+                    return null;
+                }
                 // Retornamos el IdImagenGenerada directamente
                 return response.data.IdImagenGenerada;
 
@@ -438,24 +444,6 @@ export const useUserStore = defineStore("user", {
             this.setUsuario(null);
         },
 
-        async getImagenesGeneradasHoy(usuarioId) {
-            try {
-                const hoy = new Date().toISOString().split('T')[0]; // "2025-06-09"
-                const response = await fetch(`http://localhost:3000/imagenes?id_usuario=${usuarioId}`);
-                const imagenes = await response.json();
-
-                // Filtramos las imágenes cuya fecha sea de hoy (por día, no por hora)
-                const imagenesHoy = imagenes.filter(img => {
-                    const fechaImg = new Date(img.fecha).toISOString().split('T')[0];
-                    return fechaImg === hoy;
-                });
-
-                return imagenesHoy.length;
-            } catch (error) {
-                console.error('Error al contar imágenes de hoy:', error);
-                return 0;
-            }
-        },
 
         actualizarUsuarioLocalStorage(datosNuevos) {
             const usuarioGuardado = JSON.parse(localStorage.getItem("usuario")) || {}
@@ -481,7 +469,33 @@ export const useUserStore = defineStore("user", {
             // Actualizamos el localStorage
             localStorage.setItem("usuario", JSON.stringify(usuarioActualizado))
             this.usuario = usuarioActualizado
+        },
+
+        async verificarContrasena(passwd) {
+            try {
+                const token = JSON.parse(localStorage.getItem("usuario"))?.Token;
+                if (!token) throw new Error("Usuario no autenticado");
+
+                const response = await axios.post(
+                    "https://localhost:44328/api/usuarios/verificarContrasena",
+                    { passwd },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+
+                // Devuelve el resultado para que el componente pueda usarlo
+                return response.data;
+            } catch (error) {
+                console.error("Error al verificar la contraseña:", error);
+                // Opcional: podrías devolver un objeto con exito: false para manejar errores
+                return { Exito: false, Mensaje: error.response?.data?.Mensaje || error.message };
+            }
         }
+
 
 
 
