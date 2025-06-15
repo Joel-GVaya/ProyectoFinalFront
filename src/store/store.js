@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import axios from "axios";
 import { useAvisosStore } from "@/store/avisos";
 
-const API_URL = "https://localhost:44377/";
+const API_URL = "https://localhost:44328/api/";
 
 export const useUserStore = defineStore("user", {
     state: () => ({
@@ -21,7 +21,7 @@ export const useUserStore = defineStore("user", {
         async populateEstilos() {
             try {
                 const response = await axios.get(
-                    "https://localhost:44328/api/estilos",
+                    API_URL + "estilos",
                     {
                         headers: {
                             Authorization: `Bearer ${JSON.parse(localStorage.getItem("usuario"))?.Token}`
@@ -46,7 +46,7 @@ export const useUserStore = defineStore("user", {
 
             try {
                 const response = await axios.post(
-                    "https://localhost:44328/api/generador/subir/imagen",
+                    API_URL + "generador/subir/imagen",
                     formData,
                     {
                         headers: {
@@ -100,7 +100,7 @@ export const useUserStore = defineStore("user", {
                 const token = JSON.parse(localStorage.getItem("usuario"))?.Token || "";
 
                 const response = await axios.post(
-                    "https://localhost:44328/api/generador/subir/texto",
+                    API_URL + "generador/subir/texto",
                     formData,
                     {
                         headers: {
@@ -154,7 +154,7 @@ export const useUserStore = defineStore("user", {
 
             try {
                 const response = await axios.get(
-                    `https://localhost:44328/api/imagenes/publicar/${id}`,
+                    API_URL + `imagenes/publicar/${id}`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -205,7 +205,7 @@ export const useUserStore = defineStore("user", {
                     throw new Error("Token no disponible. El usuario no está autenticado.");
                 }
 
-                const response = await axios.get(`https://localhost:44328/api/imagenes/usuario/${id}`, {
+                const response = await axios.get(API_URL + `imagenes/usuario/${id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -245,7 +245,7 @@ export const useUserStore = defineStore("user", {
                     throw new Error("Token no disponible. El usuario no está autenticado.");
                 }
 
-                const response = await axios.get("https://localhost:44328/api/imagenes/usuario", {
+                const response = await axios.get(API_URL + "imagenes/usuario", {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -283,7 +283,7 @@ export const useUserStore = defineStore("user", {
 
         async getPublicaciones() {
             try {
-                const response = await axios.get("https://localhost:44328/api/imagenes/publicaciones");
+                const response = await axios.get(API_URL + "imagenes/publicaciones");
                 return response.data;
             } catch (error) {
                 let errorMessage = "Error desconocido al obtener las imagenes publicadas";
@@ -322,7 +322,7 @@ export const useUserStore = defineStore("user", {
             }
 
             try {
-                const response = await axios.delete(`https://localhost:44328/api/imagenes/usuario/${id}`, {
+                const response = await axios.delete(API_URL + `imagenes/usuario/${id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -354,7 +354,7 @@ export const useUserStore = defineStore("user", {
         async crearUsuario(nuevoUsuario) {
             try {
                 const response = await axios.post(
-                    "https://localhost:44328/api/usuarios/registrar",
+                    API_URL + "usuarios/registrar",
                     nuevoUsuario
                 );
 
@@ -364,23 +364,11 @@ export const useUserStore = defineStore("user", {
             }
         },
 
-        async editarUsuario(id, datosActualizados) {
-            try {
-                await axios.put(
-                    `http://localhost:3000/usuarios/${id}`,
-                    datosActualizados
-                );
-                this.setUsuario(datosActualizados);
-                console.log("Datos actualizados:", datosActualizados);
-            } catch (error) {
-                console.error("Error al editar el usuario:", error);
-            }
-        },
 
         async actualizarUsuario(usuarioActualizado) {
             try {
                 const response = await axios.put(
-                    "https://localhost:44328/api/usuarios",
+                    API_URL + "usuarios",
                     usuarioActualizado,
                     {
                         headers: {
@@ -403,7 +391,7 @@ export const useUserStore = defineStore("user", {
         async iniciarSesion(correo, password) {
             try {
                 const response = await axios.post(
-                    "https://localhost:44328/api/usuarios/login",
+                    API_URL + "usuarios/login",
                     {
                         correo: correo,
                         password: password
@@ -477,7 +465,7 @@ export const useUserStore = defineStore("user", {
                 if (!token) throw new Error("Usuario no autenticado");
 
                 const response = await axios.post(
-                    "https://localhost:44328/api/usuarios/verificarContrasena",
+                    API_URL + "usuarios/verificarContrasena",
                     { passwd },
                     {
                         headers: {

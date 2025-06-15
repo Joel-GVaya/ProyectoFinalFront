@@ -1,5 +1,8 @@
 <template>
     <div class="publicaciones-usuarios">
+        <br>
+        <br>
+        <br>
         <h1>Imágenes publicadas por usuarios</h1>
         <p>Aquí puedes ver todas las imágenes que otros usuarios han compartido públicamente.</p>
 
@@ -169,8 +172,16 @@ export default {
 <style scoped>
 .publicaciones-usuarios {
     text-align: center;
-    margin-top: 2rem;
     font-family: Arial, sans-serif;
+    background-color: #284870;
+}
+
+.publicaciones-usuarios h1{
+    color: white;
+}
+
+.publicaciones-usuarios p{
+    color: white;
 }
 
 .filtros {
@@ -183,7 +194,7 @@ export default {
 
 .filtros label {
     font-weight: 600;
-    color: #4a148c;
+    color: white;
 }
 
 .filtros select,
@@ -203,11 +214,12 @@ export default {
     max-width: 1000px;
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
     border-radius: 12px;
+    border: 5px solid #ad34b0;
     overflow: hidden;
 }
 
 th {
-    background-color: #6a1b9a;
+    background-color: #602f60;
     color: white;
     padding: 1rem;
     font-size: 1rem;
@@ -215,10 +227,11 @@ th {
 }
 
 td {
-    background-color: #f9f9f9;
+    background-color: #67497e;
     padding: 1rem;
     text-align: center;
     border-bottom: 1px solid #ddd;
+    color: white;
 }
 
 tr:last-child td {

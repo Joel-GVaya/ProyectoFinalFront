@@ -40,6 +40,6 @@ function mostrarAviso(mensaje) {
 
 /* El contenido se separa del header y navbar fijo */
 .app-content {
-  padding-top: 130px; /* Ajusta este valor al total de la altura fija */
+  padding-top: 200px; /* Ajusta este valor al total de la altura fija */
 }
 </style>

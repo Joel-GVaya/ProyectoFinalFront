@@ -124,7 +124,7 @@ export default {
 
 .examples h2 {
   font-size: 2rem;
-  color: #6a1b9a;
+  color: whitesmoke;
   margin-bottom: 1.5rem;
 }
 

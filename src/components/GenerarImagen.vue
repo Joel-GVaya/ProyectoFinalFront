@@ -1,5 +1,5 @@
 <template>
-  <div class="transformar-imagen">
+  <div class="generar-imagen">
     <!-- Barra lateral -->
     <aside class="sidebar">
       <h2>Estilos</h2>
@@ -11,6 +11,10 @@
         </li>
       </ul>
     </aside>
+
+    <div class="middle-text">
+      ¡Introduce la descripcion de la imagen que quieres generar y selecciona un estilo!
+    </div>
 
     <!-- Área principal -->
     <main class="main-content">
@@ -96,25 +100,28 @@ export default {
 <style scoped>
 /* (mismos estilos que ya tenías, agregué un loader para el botón) */
 
-.transformar-imagen {
+.generar-imagen {
   display: flex;
+  align-items: center;
   height: 85vh;
-  background-color: #f3f3f3;
+  background-color: #284870;
 }
 
+/* Barra lateral */
 .sidebar {
-  margin: 5px;
+  margin-left: 40px;
   width: 20%;
-  background-color: #d1c4e9;
+  background-color: #5d497c;
   padding: 1rem;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  overflow-y: auto;
-  border: 4px solid #6a1b9a;
+  border: 4px solid #8433ae;
   border-radius: 12px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .sidebar h2 {
-  color: #6a1b9a;
+  color: white;
   margin-bottom: 1rem;
   font-size: 1.5rem;
   text-align: center;
@@ -142,7 +149,7 @@ export default {
 }
 
 .sidebar li:hover {
-  background-color: #a5d6a7;
+  background-color: #9bf138d2;
 }
 
 .sidebar li.selected {
@@ -171,16 +178,17 @@ export default {
   flex-direction: column;
   justify-content: flex-end;
   padding: 2rem;
+  background-color: #284870;
 }
 
 .text-input-area {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  background-color: white;
+  background-color: #335f96;
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
   text-align: center;
 }
 
@@ -188,7 +196,7 @@ export default {
   display: block;
   font-weight: bold;
   margin-bottom: 0.5rem;
-  color: #6a1b9a;
+  color: white;
   font-size: 1.1rem;
 }
 
@@ -237,6 +245,29 @@ export default {
   border-radius: 50%;
   animation: spin 1s linear infinite;
   display: inline-block;
+}
+
+.middle-text {
+  color: white;
+  font-size: 4rem;
+  font-weight: bold;
+  font-family: 'Poppins', 'Quicksand', 'Nunito', sans-serif;
+  max-width: 18%;
+  /* tipografías redondeadas comunes */
+  text-align: center;
+  align-self: center;
+  /* para centrar verticalmente en flex container */
+  margin: 0 20px;
+
+  /* Sombra verdosa en las letras */
+  text-shadow:
+    2px 2px 4px #4f8868,   /* sombra abajo derecha */
+    -2px 2px 4px #4f8868,  /* sombra abajo izquierda */
+    2px 0 3px #4f8868,     /* sombra derecha */
+    -2px 0 3px #4f8868;    /* sombra izquierda */
+
+  user-select: none;
+  /* opcional para que no se seleccione */
 }
 
 @keyframes spin {

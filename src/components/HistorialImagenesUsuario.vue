@@ -1,5 +1,8 @@
 <template>
     <div class="historial-imagenes">
+        <br>
+        <br>
+        <br>
         <h1>Historial de imágenes</h1>
         <p>Aquí podrás ver todas las imágenes generadas.</p>
 
@@ -74,13 +77,16 @@
                 </tr>
             </tbody>
         </table>
-
+        <br>
         <!-- Paginación -->
         <div class="paginacion" v-if="totalPaginas > 1" style="margin-top: 1rem;">
             <button @click="paginaActual--" :disabled="paginaActual === 1">Anterior</button>
             <span>Página {{ paginaActual }} de {{ totalPaginas }}</span>
             <button @click="paginaActual++" :disabled="paginaActual === totalPaginas">Siguiente</button>
         </div>
+        <br>
+        <br>
+        <br>
     </div>
 </template>
 
@@ -211,8 +217,16 @@ export default {
 <style scoped>
 .historial-imagenes {
     text-align: center;
-    margin-top: 2rem;
     font-family: Arial, sans-serif;
+    background-color: #284870;
+}
+
+.historial-imagenes h1{
+    color: white;
+}
+
+.historial-imagenes p{
+    color: white;
 }
 
 .filtros {
@@ -225,7 +239,7 @@ export default {
 
 .filtros label {
     font-weight: 600;
-    color: #4a148c;
+    color: white;
 }
 
 .filtros select,
@@ -245,11 +259,12 @@ export default {
     max-width: 1000px;
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
     border-radius: 12px;
+    border: 5px solid #aa33b1;
     overflow: hidden;
 }
 
 th {
-    background-color: #6a1b9a;
+    background-color: #602f60;
     color: white;
     padding: 1rem;
     font-size: 1rem;
@@ -257,10 +272,11 @@ th {
 }
 
 td {
-    background-color: #f9f9f9;
+    background-color: #67497e;
     padding: 1rem;
     text-align: center;
     border-bottom: 1px solid #ddd;
+    color: white;
 }
 
 tr:last-child td {
@@ -286,7 +302,7 @@ tr:last-child td {
 }
 
 .opciones-botonera button {
-    background-color: #6a1b9a;
+    background-color: #aa33b1;
     color: white;
     border: none;
     border-radius: 50%;
@@ -376,6 +392,10 @@ button:hover {
     color: #6a1b9a;
     cursor: pointer;
     transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.paginacion span {
+    color: white;
 }
 
 .paginacion button:disabled {

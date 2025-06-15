@@ -43,8 +43,9 @@
     </div>
 
     <header class="app-header">
-      <img src="@/assets/Pixalchemy.png" alt="Logo de la App" class="app-logo" />
-    </header>
+  <img src="@/assets/logo3.png" alt="Logo de la App" class="main-logo" />
+</header>
+
 
     <nav class="navbar">
       <ul>
@@ -144,9 +145,21 @@ body {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  height: 50px;
+  height: 400px;
   z-index: 1001;
 }
+
+/* Nuevo selector para el logo central */
+.main-logo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  height: 400px; /* o el tamaño que desees */
+  z-index: 1001;
+  pointer-events: none; /* esto solo afecta al logo visual, no al user-icon */
+}
+
 
 /* USER MENU FIJO */
 .user-menu {
@@ -163,7 +176,7 @@ body {
   cursor: pointer;
   border: 2px solid white;
   object-fit: cover;
-  margin-top: 40px;
+  margin-top: 215px;
   margin-right: 45px;
 }
 
@@ -256,7 +269,8 @@ body {
   display: flex;
   width: 100%;
   justify-content: space-between;
-  margin-top: 15px
+  margin-top: 15px;
+  z-index: 1002;
 }
 
 .navbar li {
@@ -305,3 +319,6 @@ main, .page-content, .contenido {
   padding-top: 130px; /* 70px header + 60px navbar aprox */
 }
 </style>
+
+
+
